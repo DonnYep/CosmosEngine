@@ -10,8 +10,6 @@ namespace ProtocolCore
     public class ConsoleDebugHelper : Utility.Debug.IDebugHelper
     {
         readonly string logFullPath;
-        readonly string logFileName = "CosmosFrameworkServer.log";
-        readonly string logFolderName = "Log";
         readonly string defaultLogPath =
 #if DEBUG
             Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.Parent.FullName;
@@ -23,41 +21,24 @@ namespace ProtocolCore
         /// </summary>
         public ConsoleDebugHelper()
         {
-            logFullPath = Utility.IO.PathCombine(defaultLogPath, logFolderName);
-            Utility.IO.CreateFolder(logFullPath);
+            this.logFullPath = Utility.IO.WebPathCombine(defaultLogPath, "CosmosEngine.log");
+            LogInfo("Log file path : " + logFullPath, null);
+            Utility.IO.WriteTextFile(logFullPath, "Head");
             System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
-            LogInfo("Log file path : " + logFullPath, null);
         }
-        public ConsoleDebugHelper(string logName)
+        public ConsoleDebugHelper(string logFullPath)
         {
-            if (string.IsNullOrEmpty(logName))
-                logName = logFileName;
-            if (logName.EndsWith(".log"))
-                logFileName = logName;
-            else
-                logFileName = Utility.Text.Append(logName, ".log");
-            logFullPath = Utility.IO.PathCombine(defaultLogPath, logFolderName);
+            LogInfo("Log file path : " + logFullPath, null);
+            Utility.Text.IsStringValid(logFullPath, "LogFullPath is invalid !");
+            this.logFullPath = logFullPath;
+            Utility.IO.WriteTextFile(logFullPath, "Head");
             System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
-            Utility.IO.CreateFolder(logFullPath);
-            LogInfo("Log file path : " + logFullPath, null);
-        }
-        public ConsoleDebugHelper(string logName, string logFullPath)
-        {
-            if (string.IsNullOrEmpty(logName))
-                logName = logFileName;
-            if (string.IsNullOrEmpty(logFullPath))
-            {
-                this.logFullPath = Utility.IO.PathCombine(defaultLogPath, logFolderName);
-            }
-            else
-                this.logFullPath = logFileName;
-            Utility.IO.CreateFolder(this.logFullPath);
-            LogInfo("Log file path : " + logFullPath, null);
         }
         public void LogInfo(object msg, object context)
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"LogInfo : { msg};{context}\n");
+             
+            Console.WriteLine($"{DateTime.Now}[ - ] > LogInfo : { msg};{context}\n");
             Info($"{msg};{context}");
             Console.ResetColor();
         }
@@ -70,23 +51,26 @@ namespace ProtocolCore
         /// <param name="context">内容，可传递对象</param>
         public void LogInfo(object msg, string msgColor, object context)
         {
+            var now = DateTime.Now;
             ConsoleColor color = (ConsoleColor)int.Parse(msgColor);
             Console.ForegroundColor = color;
-            Console.WriteLine($"INFO: { msg};{context}\n");
+            Console.WriteLine($"{now}[ - ] > INFO: { msg};{context}\n");
             Info($"{msg};{context}");
             Console.ResetColor();
         }
         public void LogWarning(object msg, object context)
         {
+            var now = DateTime.Now;
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"WARN : { msg};{context}\n");
+            Console.WriteLine($"{now}[ - ] > WARN : { msg};{context}\n");
             Warring(msg.ToString());
             Console.ResetColor();
         }
         public void LogError(object msg, object context)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"ERROR : { msg};{context}\n");
+            var now = DateTime.Now;
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine($"{now}[ - ] > ERROR : { msg};{context}\n");
             Error($"{msg};{context}");
             Console.ResetColor();
         }
@@ -95,64 +79,63 @@ namespace ProtocolCore
         /// </summary>
         public void LogFatal(object msg, object context)
         {
+            var now = DateTime.Now;
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"FATAL : { msg};{context}\n");
+            Console.WriteLine($"{now}[ - ] > FATAL : { msg};{context}\n");
             Fatal($"{msg};{context}");
             Console.ResetColor();
         }
-
         void Error(string msg)
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > ERROR : {msg};\nStackTrace[ - ] ：\n {st}";
+            string str = $"{DateTime.Now}[ - ] > ERROR : {msg};\nStackTrace[ - ] ：\n {st}";
 #else
-
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now.ToString()}[ - ] > ERROR : {msg};\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
-            Utility.IO.AppendWriteTextFile(logFullPath, logFileName, str);
+            Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
         void Info(string msg)
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > INFO : {msg};\nStackTrace[ - ] ：{st}";
+            string str = $"{DateTime.Now}[ - ] > INFO : {msg};\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now.ToString()}[ - ] > INFO : {msg};\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
-            Utility.IO.AppendWriteTextFile(logFullPath, logFileName, str);
+            Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
         void Warring(string msg)
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > WARN : {msg};\nStackTrace[ - ] ：{st}";
+            string str = $"{DateTime.Now}[ - ] > WARN : {msg};\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now.ToString()}[ - ] > WARN : {msg};\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
-            Utility.IO.AppendWriteTextFile(logFullPath, logFileName, str);
+            Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
         void Fatal(string msg)
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > FATAL : {msg};\nStackTrace[ - ] ：{st}";
+            string str = $"{DateTime.Now}[ - ] > FATAL : {msg};\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now.ToString()}[ - ] > FATAL : {msg};\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
-            Utility.IO.AppendWriteTextFile(logFullPath, logFileName, str);
+            Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
         /// <summary>
         /// 全局异常捕获器

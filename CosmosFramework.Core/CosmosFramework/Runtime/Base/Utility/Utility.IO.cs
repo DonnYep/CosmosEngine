@@ -91,7 +91,7 @@ namespace Cosmos
             }
             public static void CreateFolder(string path, string folderName)
             {
-                var fullPath = PathCombine(path, folderName);
+                var fullPath = Path.Combine(path, folderName);
                 var dir = new DirectoryInfo(fullPath);
                 if (!dir.Exists)
                 {
