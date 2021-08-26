@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System;
-namespace Cosmos.Mvvm
+﻿using System.Collections.Generic;
+namespace PureMVC
 {
-    public class View : ConcurrentSingleton<View>
+    public class View : MVCSingleton<View>
     {
         protected Dictionary<string, Mediator> mediatorDict;
 
@@ -11,22 +9,21 @@ namespace Cosmos.Mvvm
         public View()
         {
             mediatorDict = new Dictionary<string, Mediator>();
-
         }
         public virtual void RegisterMediator(Mediator mediator)
         {
             lock (locker)
             {
-                if (!mediatorDict.ContainsKey(mediator.MediatorName))
+                if (mediatorDict.ContainsKey(mediator.MediatorName))
+                    return;
+                mediatorDict.Add(mediator.MediatorName, mediator);
+                var bindedKeys = mediator.EventKeys;
+                if (bindedKeys != null)
                 {
-                    mediatorDict.Add(mediator.MediatorName, mediator);
-                    var bindedKeys = mediator.EventKeys;
-                    if (bindedKeys == null)
-                        return;
                     var length = bindedKeys.Count;
                     for (int i = 0; i < length; i++)
                     {
-                         ViewModel.Instance. AddListener(bindedKeys[i], mediator.HandleEvent);
+                        Controller.Instance.AddListener(bindedKeys[i], mediator.HandleEvent);
                     }
                 }
             }
@@ -37,14 +34,17 @@ namespace Cosmos.Mvvm
             Mediator mediator = null;
             lock (locker)
             {
-                if (mediatorDict.ContainsKey(mediatorName))
+                if (!mediatorDict.ContainsKey(mediatorName))
+                    return;
+                mediator = mediatorDict[mediatorName];
+                mediatorDict.Remove(mediatorName);
+                var bindedKeys = mediator.EventKeys;
+                if (bindedKeys != null)
                 {
-                    mediatorDict.Remove(mediatorName, out mediator);
-                    var bindedKeys = mediator.EventKeys;
                     var length = bindedKeys.Count;
                     for (int i = 0; i < length; i++)
                     {
-                        ViewModel.Instance.RemoveListener(bindedKeys[i], mediator.HandleEvent);
+                        Controller.Instance.RemoveListener(bindedKeys[i], mediator.HandleEvent);
                     }
                 }
             }
@@ -65,10 +65,10 @@ namespace Cosmos.Mvvm
                 return mediatorDict.ContainsKey(mediatorName);
             }
         }
-        public void Dispatch(string actionKey, object sender, NotifyArgs notifyArgs)
+        public void Dispatch(INotifyArgs notifyArgs)
         {
-            ViewModel.Instance.Dispatch(actionKey, sender, notifyArgs);
+            Controller.Instance.Dispatch(notifyArgs);
         }
-        protected virtual void OnInitialization(){}
+        protected virtual void OnInitialization() { }
     }
 }
