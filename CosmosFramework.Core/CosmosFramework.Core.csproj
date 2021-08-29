@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="CosmosFramework\Runtime\Base\Utility\Helper\" />
+    <Compile Remove="CosmosFramework\Runtime\Base\Utility\Helper\**" />
+    <EmbeddedResource Remove="CosmosFramework\Runtime\Base\Utility\Helper\**" />
+    <None Remove="CosmosFramework\Runtime\Base\Utility\Helper\**" />
   </ItemGroup>
 
 </Project>
