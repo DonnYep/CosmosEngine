@@ -7,57 +7,42 @@ namespace Cosmos
 {
     public partial class TickTimer
     {
-        class TickTaskGroup
+        class TickTaskInfo
         {
             public int TaskId { get; }
             public Action<int> Callbak { get; }
-            public TickTaskGroup(int taskId, Action<int> callbak)
+            public TickTaskInfo(int taskId, Action<int> callbak)
             {
                 TaskId = taskId;
                 Callbak = callbak;
             }
         }
-        class TickTask
-        {
-            public int TaskId { get; set; }
-            public uint Delay { get; set; }
-            public int Count { get; set; }
-            public double DestTime { get; set; }
-            public Action<int> TaskCallback { get; set; }
-            public Action<int> CancelCallback { get; set; }
-            public double StartTime { get; set; }
-            public ulong LoopIndex { get; set; }
-            public TickTask(int taskId, uint delay, int count, double destTime, Action<int> taskCallback, Action<int> cancelCallback, double startTime)
-            {
-                this.TaskId = taskId;
-                this.Delay = delay;
-                this.Count = count;
-                this.DestTime = destTime;
-                this.TaskCallback = taskCallback;
-                this.CancelCallback = cancelCallback;
-                this.StartTime = startTime;
-            }
-        }
+        public Action<string> LogInfo { get; set; }
+        public Action<string> LogWarn { get; set; }
+        public Action<string> LogError { get; set; }
 
         readonly DateTime startDateTime = new DateTime(1970, 1, 1, 0, 0, 0);
-        readonly ConcurrentDictionary<int, TickTimer.TickTask> taskDict;
-        readonly bool setHandle;
+        readonly ConcurrentDictionary<int, TickTask> taskDict;
         /// <summary>
         /// 缓存池；
         /// </summary>
-        readonly ConcurrentQueue<TickTaskGroup> taskCacheQue;
-        const string TaskIdLocker = "TickTimer_TaskIdLocker";
+        readonly ConcurrentQueue<TickTaskInfo> taskCacheQue;
+        /// <summary>
+        /// 启用缓存；
+        /// </summary>
+        readonly bool enableCache;
+        readonly object locker = new object();
         readonly Thread timerThread;
         int TaskId = 0;
 
-        public Action<string> LogInfo { get; set; }
-        public Action<string> LogError { get; set; }
-        public Action<string> LogWarn { get; set; }
-        public TickTimer(int interval = 0,bool setHandle=false)
+        public TickTimer(int interval = 0, bool enableCache = true)
         {
+            this.enableCache = enableCache;
+            if (enableCache)
+            {
+                taskCacheQue = new ConcurrentQueue<TickTaskInfo>();
+            }
             taskDict = new ConcurrentDictionary<int, TickTask>();
-            taskCacheQue = new ConcurrentQueue<TickTaskGroup>();
-            this.setHandle = setHandle;
             if (interval != 0)
             {
                 timerThread = new Thread(new ThreadStart(() => StartTick(interval)));
@@ -83,9 +68,9 @@ namespace Cosmos
         {
             if (taskDict.TryRemove(taskId, out TickTask task))
             {
-                if (setHandle && task.CancelCallback != null)
+                if (enableCache&&task.CancelCallback != null)
                 {
-                    taskCacheQue.Enqueue(new TickTaskGroup(taskId, task.CancelCallback));
+                    taskCacheQue.Enqueue(new TickTaskInfo(taskId, task.CancelCallback));
                 }
                 else
                 {
@@ -138,10 +123,7 @@ namespace Cosmos
         }
         public void Reset()
         {
-            if (!taskCacheQue.IsEmpty)
-            {
-                //WarnFunc?.Invoke("Callback Queue is not Empty.");
-            }
+            taskCacheQue.Clear();
             taskDict.Clear();
             if (timerThread != null)
             {
@@ -150,7 +132,7 @@ namespace Cosmos
         }
         int GenerateTaskId()
         {
-            lock (TaskIdLocker)
+            lock (locker)
             {
                 while (true)
                 {
@@ -178,19 +160,13 @@ namespace Cosmos
             }
             catch (ThreadAbortException e)
             {
-                throw e;
+                LogError(e.ToString());
             }
         }
         void TaskCallback(int taskId, Action<int> taskCallback)
         {
-            if (setHandle)
-            {
-                taskCacheQue.Enqueue(new TickTaskGroup(taskId, taskCallback));
-            }
-            else
-            {
-                taskCallback.Invoke(taskId);
-            }
+            taskCacheQue.Enqueue(new TickTaskInfo(taskId, taskCallback));
+            taskCallback.Invoke(taskId);
         }
         void FinishTask(int tid)
         {
