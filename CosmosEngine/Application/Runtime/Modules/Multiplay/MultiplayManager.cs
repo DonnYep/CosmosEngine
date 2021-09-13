@@ -30,7 +30,6 @@ namespace CosmosEngine
         /// <summary>
         /// 当前帧;
         /// </summary>
-        long currentFrame = 0;
         OperationData inputOpData;
         protected override void OnPreparatory()
         {
@@ -66,7 +65,6 @@ namespace CosmosEngine
                 {
                     CosmosEntry.NetworkManager.SendNetworkMessage(sndData, connList[i].Conv);
                 }
-                currentFrame++;
             }
         }
         void OnReceiveDataHandler(int conv, byte[] data)
