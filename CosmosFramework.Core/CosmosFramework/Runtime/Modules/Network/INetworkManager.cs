@@ -13,7 +13,6 @@ namespace Cosmos
         event Action<int> OnDisconnected;
         event Action<int,byte[]> OnReceiveData;
 
-        void SendNetworkMessage(byte[] buffer, IPEndPoint endPoint);
         void SendNetworkMessage(KcpChannel channelId, byte[] data, int connectionId);
         void SendNetworkMessage(byte[] data, int connectionId);
         /// <summary>

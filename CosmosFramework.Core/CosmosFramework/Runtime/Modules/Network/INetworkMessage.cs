@@ -8,11 +8,9 @@ namespace Cosmos
     public interface INetworkMessage
     {
         long Conv { get; }
-        UdpHeader HeaderCode{ get; }
         byte[] EncodeMessage();
         bool DecodeMessage(byte[] buffer);
         byte[] ServiceData { get; }
         byte[] GetBuffer();
-
     }
 }

@@ -16,14 +16,7 @@ namespace Cosmos.Network
     /// </summary>
     internal sealed partial class NetworkManager : Module, INetworkManager
     {
-        #region UDP
-        INetworkService service;
-        IHeartbeat heartbeat;
-        #endregion
-
-        #region KCP
         KcpServerService kcpServerService;
-        #endregion
 
         public event Action<int, byte[]> OnReceiveData
         {
@@ -46,19 +39,10 @@ namespace Cosmos.Network
             add { onDisconnected += value; }
             remove { onDisconnected -= value; }
         }
-
-        public void SendNetworkMessage(byte[] buffer, IPEndPoint endPoint)
-        {
-            service.SendMessageAsync(buffer, endPoint);
-        }
         public void SendNetworkMessage(KcpChannel channelId, byte[] data, int connectionId)
         {
             switch (currentNetworkProtocolType)
             {
-                case NetworkProtocolType.TCP:
-                    break;
-                case NetworkProtocolType.UDP:
-                    break;
                 case NetworkProtocolType.KCP:
                     {
                         var segment = new ArraySegment<byte>(data);
@@ -100,21 +84,6 @@ namespace Cosmos.Network
                         kcpServerService.ServiceConnect();
                     }
                     break;
-                case NetworkProtocolType.TCP:
-                    {
-                    }
-                    break;
-                case NetworkProtocolType.UDP:
-                    {
-                        //service = new UdpServerService();
-                        //UdpServerService udp = service as UdpServerService;
-                        //udp.OnReceiveData += OnReceiveDataHandler;
-                        //udp.OnConnected+= OnConnectedHandler;
-                        //udp.OnDisconnected+= OnDisconnectedHandler;
-                        //udp.Port = port;
-                        //service.OnInitialization();
-                    }
-                    break;
             }
         }
         /// <summary>
@@ -125,10 +94,6 @@ namespace Cosmos.Network
         {
             switch (currentNetworkProtocolType)
             {
-                case NetworkProtocolType.TCP:
-                    break;
-                case NetworkProtocolType.UDP:
-                    break;
                 case NetworkProtocolType.KCP:
                     kcpServerService?.ServiceDisconnect(connectionId);
                     break;
@@ -145,11 +110,6 @@ namespace Cosmos.Network
                 return;
             switch (currentNetworkProtocolType)
             {
-                case NetworkProtocolType.TCP:
-                    break;
-                case NetworkProtocolType.UDP:
-                    // service?.OnRefresh();
-                    break;
                 case NetworkProtocolType.KCP:
                     kcpServerService?.ServiceTick();
                     break;

@@ -47,6 +47,5 @@ namespace kcp
             // gigabytes
             return $"{(bytes / (1024f * 1024f * 1024f)):F2} GB";
         }
-
     }
 }

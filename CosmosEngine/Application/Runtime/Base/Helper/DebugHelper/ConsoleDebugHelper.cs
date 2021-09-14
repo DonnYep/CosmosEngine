@@ -89,12 +89,12 @@ namespace ProtocolCore
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now}[ - ] > ERROR : {msg};\nStackTrace[ - ] ：\n {st}";
+            string str = $"{DateTime.Now}[ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n {st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > ERROR : {msg};\nStackTrace[ - ] ：\n {st}{st0}{st1}";
+            string str = $"{DateTime.Now.ToString()}[ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
             Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
@@ -102,12 +102,12 @@ namespace ProtocolCore
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now}[ - ] > INFO : {msg};\nStackTrace[ - ] ：{st}";
+            string str = $"{DateTime.Now}[ - ] > INFO : {msg}\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > INFO : {msg};\nStackTrace[ - ] ：\n {st}{st0}{st1}";
+            string str = $"{DateTime.Now.ToString()}[ - ] > INFO : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
             Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
@@ -115,12 +115,12 @@ namespace ProtocolCore
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now}[ - ] > WARN : {msg};\nStackTrace[ - ] ：{st}";
+            string str = $"{DateTime.Now}[ - ] > WARN : {msg}\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > WARN : {msg};\nStackTrace[ - ] ：\n {st}{st0}{st1}";
+            string str = $"{DateTime.Now.ToString()}[ - ] > WARN : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
             Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
@@ -128,12 +128,12 @@ namespace ProtocolCore
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now}[ - ] > FATAL : {msg};\nStackTrace[ - ] ：{st}";
+            string str = $"{DateTime.Now}[ - ] > FATAL : {msg}\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > FATAL : {msg};\nStackTrace[ - ] ：\n {st}{st0}{st1}";
+            string str = $"{DateTime.Now.ToString()}[ - ] > FATAL : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
             Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
