@@ -13,7 +13,6 @@ namespace Cosmos
         event Action<int> OnDisconnected;
         event Action<int,byte[]> OnReceiveData;
 
-        void SendNetworkMessage(KcpChannel channelId, byte[] data, int connectionId);
         void SendNetworkMessage(byte[] data, int connectionId);
         /// <summary>
         /// 与远程建立连接；
@@ -21,7 +20,7 @@ namespace Cosmos
         /// </summary>
         /// <param name="port">端口号</param>
         /// <param name="protocolType">协议类型</param>
-        void Connect( ushort port, NetworkProtocolType protocolType= NetworkProtocolType.KCP);
+        void Connect( ushort port, NetworkProtocol protocolType= NetworkProtocol.KCP);
         /// <summary>
         /// 与指定的链接Id断开；
         /// </summary>

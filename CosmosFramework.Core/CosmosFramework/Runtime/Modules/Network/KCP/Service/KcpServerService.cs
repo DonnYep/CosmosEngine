@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace kcp
 {
     public class KcpServerService: KcpServiceBase
     {
         KcpServer server;
+        public KcpServer Server { get { return server; } }
         public event Action<int> OnServerConnected
         {
             add { onServerConnected += value; }
