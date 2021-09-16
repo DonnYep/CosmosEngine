@@ -8,7 +8,6 @@ namespace Cosmos.Network
     {
         public string Name;
         public string IPAddress;
-        public string NetworkType;
         public readonly static NetworkChannelInfo None = new NetworkChannelInfo();
     }
 }

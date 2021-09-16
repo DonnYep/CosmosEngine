@@ -5,11 +5,15 @@ using System;
 using Cosmos;
 namespace Cosmos.FSM
 {
+    //================================================
+    /*
+     * 1、有限状态机模块；
+     * 
+     * 2、此模块线程安全；
+    */
+    //================================================
     [Module]
-    /// <summary>
-    /// fsmMgr设计成，轮询是在具体对象山给轮询的，fsmMgr作为一个Fsm的事件中心
-    /// </summary>
-    internal sealed class FSMManager : Module,IFSMManager
+    internal sealed class FSMManager : Module, IFSMManager
     {
         #region Properties
         /// <summary>

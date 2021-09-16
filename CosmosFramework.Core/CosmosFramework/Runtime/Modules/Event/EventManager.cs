@@ -3,10 +3,17 @@ using System.Collections.Concurrent;
 using System;
 namespace Cosmos.Event
 {
+    //================================================
+    /*
+     * 1、消息中心，适用于全局消息事件注册与监听；
+     * 
+     * 2、此模块线程安全；
+    */
+    //================================================
     [Module]
     internal sealed partial class EventManager : Module, IEventManager
     {
-        Dictionary<string, EventNode> eventDict;
+        ConcurrentDictionary<string, EventNode> eventDict;
         public int EventCount { get { return eventDict.Count; } }
         /// <summary>
         /// 添加事件
@@ -130,7 +137,7 @@ namespace Cosmos.Event
         }
         protected override void OnInitialization()
         {
-            eventDict = new Dictionary<string, EventNode>();
+            eventDict = new ConcurrentDictionary<string, EventNode>();
         }
     }
 }

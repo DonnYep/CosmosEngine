@@ -19,9 +19,9 @@ namespace Cosmos.QuadTree
             listPool = new QuadTreePool<List<T>>(() => new List<T>(), lst => { lst.Clear(); });
             hashSetPool = new QuadTreePool<HashSet<T>>(() => new HashSet<T>(), hs => { hs.Clear(); });
         }
-        public static QuadTree<T> Create(float x, float y, float width, float height, IObjecRectangletBound<T> quadTreebound, int objectCapacity = 10, int maxDepth = 5)
+        public static QuadTree<T> Create(float x, float y, float width, float height, IObjecRectangletBound<T> quadTreebound, int maxNodeObject = 10, int maxDepth = 5)
         {
-            return Create(x, y, width, height, null, quadTreebound, objectCapacity, maxDepth, 0);
+            return CreateNode(x, y, width, height, null, quadTreebound, maxNodeObject, maxDepth, 0);
         }
         public static void Release(QuadTree<T> node)
         {
@@ -36,13 +36,20 @@ namespace Cosmos.QuadTree
             listPool.Clear();
             hashSetPool.Clear();
         }
-        static QuadTree<T> Create(float x, float y, float width, float height, QuadTree<T> parent, IObjecRectangletBound<T> quadTreebound, int objectCapacity = 10, int maxDepth = 5, int currentDepth = 0)
+        static QuadTree<T> CreateNode(float x, float y, float width, float height, QuadTree<T> parent, IObjecRectangletBound<T> quadTreebound, int maxNodeObject, int maxDepth, int currentDepth)
         {
             var node = nodePool.Spawn();
-            node.SetNode(x, y, width, height, quadTreebound, objectCapacity, maxDepth, currentDepth);
+            node.parent = parent;
+            node.SetNode(x, y, width, height, quadTreebound, maxNodeObject, maxDepth, currentDepth);
             return node;
         }
 
+        Action<T> onObjectOutQuadRectangle;
+        public event Action<T> OnObjectOutQuadRectangle
+        {
+            add { onObjectOutQuadRectangle += value; }
+            remove { onObjectOutQuadRectangle -= value; }
+        }
         /// <summary>
         ///当前所在的区块；
         /// </summary>
@@ -55,7 +62,7 @@ namespace Cosmos.QuadTree
         /// <summary>
         /// 当前Rect的对象数量；
         /// </summary>
-        public int ObjectCapacity { get; private set; }
+        public int MaxNodeObject { get; private set; }
         /// <summary>
         /// 当前树节点的物体对象集合；
         /// </summary>
@@ -88,48 +95,45 @@ namespace Cosmos.QuadTree
         /// BottomRight Quadrant4
         /// </summary>
         QuadTree<T> treeBR;
-
         public void CheckObjectRect()
         {
             if (hasChildren)
             {
-                treeTR.CheckObjectRect();
-                treeTL.CheckObjectRect();
-                treeBL.CheckObjectRect();
-                treeBR.CheckObjectRect();
+                var trCount = treeTR.Count();
+                var tlCount = treeTL.Count();
+                var brCount = treeBR.Count();
+                var blCount = treeBL.Count();
 
-                //var trCount = treeTR.Count();
-                //var tlCount = treeTL.Count();
-                //var brCount = treeBR.Count();
-                //var blCount = treeBL.Count();
+                var amount = trCount + tlCount + brCount + blCount;
 
-                //var amount = trCount + tlCount + brCount + blCount;
-                //if (amount ==0)
-                //    CombineQuads();
+                if (amount <= MaxNodeObject)
+                {
+                    CombineQuads();
+                }
+                else
+                {
+                    treeTR.CheckObjectRect();
+                    treeTL.CheckObjectRect();
+                    treeBL.CheckObjectRect();
+                    treeBR.CheckObjectRect();
+                }
             }
-
             else
             {
-                var list = listPool.Spawn();
-                foreach (var obj in objectSet)
+                var objectArr = objectSet.ToArray();
+                var arrLength = objectArr.Length;
+                for (int i = 0; i < arrLength; i++)
                 {
-                    //遍历，如果不符合区域包含，则添加到移除列表中；
+                    var obj = objectArr[i];
                     if (!IsObjectOverlapping(obj))
                     {
-                        list.Add(obj);
+                        if (objectSet.Remove(obj))
+                        {
+                        }
+                        InsertToParent(obj);
+                        //若父类不为空，并且符合包含规则，则添加入父类的区块中；
                     }
                 }
-                var length = list.Count;
-                for (int i = 0; i < length; i++)
-                {
-                    var obj = list[i];
-                    //从当前树中移除；
-                    objectSet.Remove(obj);
-                    //若父类不为空，并且符合包含规则，则添加入父类的区块中；
-                    if (parent != null)
-                        parent.InsertToParent(obj);
-                }
-                listPool.Despawn(list);
             }
         }
         public bool Insert(T obj)
@@ -138,22 +142,22 @@ namespace Cosmos.QuadTree
             if (!IsObjectOverlapping(obj)) return false;
             if (hasChildren)
             {
-                if (treeTL.Insert(obj)) return true;
                 if (treeTR.Insert(obj)) return true;
+                if (treeTL.Insert(obj)) return true;
                 if (treeBL.Insert(obj)) return true;
                 if (treeBR.Insert(obj)) return true;
+                return false;
             }
             else
             {
-                var result = objectSet.Add(obj);
-                if (!result)
-                    return !result;
-                if (objectSet.Count > ObjectCapacity)
+                if (!objectSet.Add(obj))
+                    return false;
+                if (objectSet.Count > MaxNodeObject)
                 {
                     Quarter();
                 }
+                return true;
             }
-            return true;
         }
         /// <summary>
         ///插入一个对象集合； 
@@ -168,26 +172,25 @@ namespace Cosmos.QuadTree
         public bool Remove(T obj)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
-            if (!IsObjectOverlapping(obj)) return false;
             if (hasChildren)
             {
-                if (treeTL.Remove(obj)) return true;
-                if (treeTR.Remove(obj)) return true;
-                if (treeBL.Remove(obj)) return true;
-                if (treeBR.Remove(obj)) return true;
-                var tlCount = treeTL.Count();
-                var trCount = treeTR.Count();
-                var blCount = treeBL.Count();
-                var brCount = treeBR.Count();
-                var result = tlCount & trCount & blCount & brCount;
-                if (result == 0)
-                    CombineQuads();
+                if (treeTL.Remove(obj) || treeTR.Remove(obj) || treeBL.Remove(obj) || treeBR.Remove(obj))
+                {
+                    var tlCount = treeTL.Count();
+                    var trCount = treeTR.Count();
+                    var blCount = treeBL.Count();
+                    var brCount = treeBR.Count();
+                    var amount = tlCount + trCount + blCount + brCount;
+                    if (amount < MaxNodeObject)
+                        CombineQuads();
+                    return true;
+                }
+                return false;
             }
             else
             {
-                objectSet.Remove(obj);
+                return objectSet.Remove(obj);
             }
-            return true;
         }
         public void RemoveRange(IEnumerable<T> objects)
         {
@@ -203,7 +206,7 @@ namespace Cosmos.QuadTree
         {
             if (hasChildren)
             {
-                var trDepth = treeTL.CurrentQuadTreeDepth();
+                var trDepth = treeTR.CurrentQuadTreeDepth();
                 var tlDepth = treeTL.CurrentQuadTreeDepth();
                 var blDepth = treeBL.CurrentQuadTreeDepth();
                 var brDepth = treeBR.CurrentQuadTreeDepth();
@@ -333,33 +336,38 @@ namespace Cosmos.QuadTree
         void InsertToParent(T obj)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
-            if (!IsObjectOverlapping(obj))
+            if (CurrentDepth != 0)
             {
-                if (parent != null)
+                if (!parent.Insert(obj))
+                {
                     parent.InsertToParent(obj);
+                }
             }
             else
-                Insert(obj);
+            {
+                if (!Insert(obj))
+                    onObjectOutQuadRectangle?.Invoke(obj);
+            }
         }
-        void SetNode(float x, float y, float width, float height, IObjecRectangletBound<T> quadTreebound, int objectCapacity = 10, int maxDepth = 5, int currentDepth = 0)
+        void SetNode(float x, float y, float width, float height, IObjecRectangletBound<T> quadTreebound, int maxNodeObject, int maxDepth, int currentDepth)
         {
             Area = new QuadRectangle(x, y, width, height);
             objectSet = hashSetPool.Spawn();
             this.objectRectangleBound = quadTreebound;
-            this.CurrentDepth = currentDepth;
+            this.MaxNodeObject = maxNodeObject;
             this.MaxDepth = maxDepth;
-            this.ObjectCapacity = objectCapacity;
+            this.CurrentDepth = currentDepth;
             hasChildren = false;
         }
         void Quarter()
         {
-            if (CurrentDepth > MaxDepth) return;
+            if (CurrentDepth >= MaxDepth) return;
             int nextDepth = CurrentDepth + 1;
             hasChildren = true;
-            treeTR = Create(Area.X + Area.HalfWidth * 0.5f, Area.Y + Area.HalfHeight * 0.5f, Area.HalfWidth, Area.HalfHeight, this, objectRectangleBound, ObjectCapacity, MaxDepth, nextDepth);
-            treeTL = Create(Area.X - Area.HalfWidth * 0.5f, Area.Y + Area.HalfHeight * 0.5f, Area.HalfWidth, Area.HalfHeight, this, objectRectangleBound, ObjectCapacity, MaxDepth, nextDepth);
-            treeBL = Create(Area.X - Area.HalfWidth * 0.5f, Area.Y - Area.HalfHeight * 0.5f, Area.HalfWidth, Area.HalfHeight, this, objectRectangleBound, ObjectCapacity, MaxDepth, nextDepth);
-            treeBR = Create(Area.X + Area.HalfWidth * 0.5f, Area.Y - Area.HalfHeight * 0.5f, Area.HalfWidth, Area.HalfHeight, this, objectRectangleBound, ObjectCapacity, MaxDepth, nextDepth);
+            treeTR = CreateNode(Area.X + Area.HalfWidth * 0.5f, Area.Y + Area.HalfHeight * 0.5f, Area.HalfWidth, Area.HalfHeight, this, objectRectangleBound, MaxNodeObject, MaxDepth, nextDepth);
+            treeTL = CreateNode(Area.X - Area.HalfWidth * 0.5f, Area.Y + Area.HalfHeight * 0.5f, Area.HalfWidth, Area.HalfHeight, this, objectRectangleBound, MaxNodeObject, MaxDepth, nextDepth);
+            treeBL = CreateNode(Area.X - Area.HalfWidth * 0.5f, Area.Y - Area.HalfHeight * 0.5f, Area.HalfWidth, Area.HalfHeight, this, objectRectangleBound, MaxNodeObject, MaxDepth, nextDepth);
+            treeBR = CreateNode(Area.X + Area.HalfWidth * 0.5f, Area.Y - Area.HalfHeight * 0.5f, Area.HalfWidth, Area.HalfHeight, this, objectRectangleBound, MaxNodeObject, MaxDepth, nextDepth);
             foreach (var obj in objectSet)
             {
                 Insert(obj);
@@ -368,12 +376,32 @@ namespace Cosmos.QuadTree
         }
         void CombineQuads()
         {
+            var allObjs = GetAllObjects();
+            var length = allObjs.Length;
             hasChildren = false;
-            objectSet = hashSetPool.Spawn();
-            Release(treeTL);
-            Release(treeTR);
-            Release(treeBL);
-            Release(treeBR);
+
+            nodePool.Despawn(treeTR);
+            nodePool.Despawn(treeTL);
+            nodePool.Despawn(treeBL);
+            nodePool.Despawn(treeBR);
+            treeTR = null;
+            treeTL = null;
+            treeBR = null;
+            treeBL = null;
+
+            for (int i = 0; i < length; i++)
+            {
+                var obj = allObjs[i];
+                if (IsObjectOverlapping(obj))
+                {
+                    if (!objectSet.Add(obj))
+                    {
+                        onObjectOutQuadRectangle?.Invoke(obj);
+                    }
+                }
+                else
+                    InsertToParent(obj);
+            }
         }
         bool IsRectOverlapping(QuadRectangle rect)
         {
@@ -396,6 +424,7 @@ namespace Cosmos.QuadTree
         {
             if (hasChildren)
             {
+                hasChildren = false;
                 nodePool.Despawn(treeTR);
                 nodePool.Despawn(treeTL);
                 nodePool.Despawn(treeBR);
@@ -405,10 +434,16 @@ namespace Cosmos.QuadTree
                 treeBR = null;
                 treeBL = null;
             }
-            hashSetPool.Despawn(objectSet);
-            objectSet = null;
-            hasChildren = false;
+            else
+            {
+                hashSetPool.Despawn(objectSet);
+                objectSet = null;
+            }
+            //MaxDepth = 0;
+            //MaxNodeObject = 0;
             parent = null;
+            //CurrentDepth = 0;
+            Area = QuadRectangle.Zero;
         }
     }
 }

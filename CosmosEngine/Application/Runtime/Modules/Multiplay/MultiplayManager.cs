@@ -3,6 +3,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Cosmos;
+using Cosmos.Network;
+
 namespace CosmosEngine
 {
     /// <summary>
@@ -14,6 +16,7 @@ namespace CosmosEngine
         public const int MaxConnection = 5;
         Dictionary<int, Connection> connDict;
         List<Connection> connList;
+        Action<NetworkReliableType ,byte[] ,int > sendMessage;
         /// <summary>
         /// 帧率；
         /// </summary>
@@ -31,6 +34,13 @@ namespace CosmosEngine
         /// 当前帧;
         /// </summary>
         OperationData inputOpData;
+        public void SetListener(INetworkChannel channel)
+        {
+            channel.OnReceiveData+= OnReceiveDataHandler;
+            channel.OnConnected += OnConnect;
+            channel.OnDisconnected+= OnDisconnect;
+            sendMessage = channel.SendMessage;
+        }
         protected override void OnPreparatory()
         {
             connDict = new Dictionary<int, Connection>();
@@ -39,9 +49,6 @@ namespace CosmosEngine
             inputOpData = new OperationData((byte)MultiplayOperationCode.PlayerInput);
             Interval = (int)1000 / FrameRate;
             latestTime = Utility.Time.MillisecondNow() + Interval;
-            CosmosEntry.NetworkManager.OnReceiveData += OnReceiveDataHandler;
-            CosmosEntry.NetworkManager.OnDisconnected += OnDisconnect;
-            CosmosEntry.NetworkManager.OnConnected += OnConnect;
         }
         [TickRefresh]
         void OnRefresh()
@@ -63,7 +70,7 @@ namespace CosmosEngine
                 var sndData = Encoding.UTF8.GetBytes(json);
                 for (int i = 0; i < length; i++)
                 {
-                    CosmosEntry.NetworkManager.SendNetworkMessage(sndData, connList[i].Conv);
+                    sendMessage(NetworkReliableType.Reliable, sndData, connList[i].Conv);
                 }
             }
         }
@@ -113,7 +120,7 @@ namespace CosmosEngine
                 var json = Utility.Json.ToJson(opData);
                 data = Encoding.UTF8.GetBytes(json);
             }
-            CosmosEntry.NetworkManager.SendNetworkMessage(data, conv);
+            sendMessage( NetworkReliableType.Reliable, data, conv);
         }
         void OnDisconnect(int conv)
         {
@@ -133,7 +140,7 @@ namespace CosmosEngine
             var data = Encoding.UTF8.GetBytes(json);
             foreach (var conn in connDict)
             {
-                CosmosEntry.NetworkManager.SendNetworkMessage(data, conn.Key);
+                sendMessage(NetworkReliableType.Reliable, data, conn.Key);
             }
         }
         void PlayerEnter(long conv)
@@ -145,7 +152,7 @@ namespace CosmosEngine
             var data = Encoding.UTF8.GetBytes(json);
             foreach (var conn in connDict)
             {
-                CosmosEntry.NetworkManager.SendNetworkMessage(data, conn.Key);
+                sendMessage(NetworkReliableType.Reliable, data, conn.Key);
             }
         }
         void ProcessHandler(int conv, OperationData opData)

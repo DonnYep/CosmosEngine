@@ -9,12 +9,14 @@ using System.IO;
 
 namespace SUDP
 {
-    /********************************************************************************
-    Secured UDP Transfer Class -- UDP安全传输类
-    采用TCP滑动窗口原理在应用层解决UDP协议传输的丢包,乱序等问题,实现UDP可靠传输;
-    要求传入的UdpClient实例为已连接的实例,即调用此类的方法前请先执行初始化实例并连接;
-    发送接收的数据类采用Stream,可应用到其子类FileStream,MemoryStream等
-    ********************************************************************************/
+    //================================================
+    /*
+   Secured UDP Transfer Class -- UDP安全传输类
+   采用TCP滑动窗口原理在应用层解决UDP协议传输的丢包,乱序等问题,实现UDP可靠传输;
+   要求传入的UdpClient实例为已连接的实例,即调用此类的方法前请先执行初始化实例并连接;
+   发送接收的数据类采用Stream,可应用到其子类FileStream,MemoryStream等
+    */
+    //================================================
     public class SUdpTransfer
     {
         const int defaultPacketSize = 513;//默认UDP包数据内容大小

@@ -21,7 +21,7 @@ namespace ProtocolCore
         /// </summary>
         public ConsoleDebugHelper()
         {
-            this.logFullPath = Utility.IO.WebPathCombine(defaultLogPath, "CosmosEngine.log");
+            this.logFullPath = Utility.IO.WebPathCombine(defaultLogPath, "ServerDebug.log");
             LogInfo("Log file path : " + logFullPath, null);
             Utility.IO.WriteTextFile(logFullPath, "Head");
             System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
@@ -37,7 +37,6 @@ namespace ProtocolCore
         public void LogInfo(object msg, object context)
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-             
             Console.WriteLine($"{DateTime.Now}[ - ] > LogInfo : { msg};{context}\n");
             Info($"{msg};{context}");
             Console.ResetColor();

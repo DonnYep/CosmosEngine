@@ -1,17 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System;
 
 namespace Cosmos.Config
 {
-    /// <summary>
-    /// 载入时候读取配置，例如声音大小，角色等
-    /// </summary>
+    //================================================
+    /*
+     * 1、配置模块，用户存储初始化需存放的全局数据；
+     * 
+     * 2、此模块线程安全；
+    */
+    //================================================
     [Module]
-    //TODO需要实现树状结构的数据配置功能；
     internal sealed partial class ConfigManager : Module, IConfigManager
     {
-        Dictionary<string, ConfigData> configDataDict;
+        ConcurrentDictionary<string, ConfigData> configDataDict;
         /// <summary>
         /// 增加指定全局配置项。
         /// </summary>
@@ -35,8 +39,7 @@ namespace Cosmos.Config
         {
             if (HasConfig(configName))
                 return false;
-            configDataDict.Add(configName, new ConfigData(boolValue, intValue, floatValue, stringValue));
-            return true;
+           return configDataDict.TryAdd(configName, new ConfigData(boolValue, intValue, floatValue, stringValue));
         }
         public bool RemoveConfig(string configName)
         {
@@ -160,7 +163,7 @@ namespace Cosmos.Config
         }
         protected override void OnInitialization()
         {
-            configDataDict = new Dictionary<string, ConfigData>();
+            configDataDict = new ConcurrentDictionary<string, ConfigData>();
         }
         protected override void OnPreparatory()
         {
