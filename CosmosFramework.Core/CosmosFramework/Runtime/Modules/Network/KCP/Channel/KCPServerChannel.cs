@@ -90,6 +90,16 @@ namespace Cosmos
         {
             kcpServerService?.ServiceDisconnect(connectionId);
         }
+        /// <summary>
+        /// 发送数据到remote;
+        /// 默认为可靠类型；
+        /// </summary>
+        /// <param name="data">数据</param>
+        /// <param name="connectionId">连接Id</param>
+        public void SendMessage(byte[] data, int connectionId)
+        {
+            SendMessage(NetworkReliableType.Reliable, data, connectionId);
+        }
         public void SendMessage(NetworkReliableType reliableType, byte[] data, int connectionId)
         {
             var segment = new ArraySegment<byte>(data);

@@ -87,6 +87,16 @@ namespace Cosmos
             kcpClientService?.ServiceDisconnect();
         }
         /// <summary>
+        /// 发送数据到remote;
+        /// 默认为可靠类型；
+        /// </summary>
+        /// <param name="data">数据</param>
+        /// <param name="connectionId">连接Id</param>
+        public void SendMessage( byte[] data, int connectionId = -1)
+        {
+            SendMessage(NetworkReliableType.Reliable, data, connectionId);
+        }
+        /// <summary>
         ///发送消息到remote;
         /// </summary>
         /// <param name="reliableType">消息可靠类型</param>

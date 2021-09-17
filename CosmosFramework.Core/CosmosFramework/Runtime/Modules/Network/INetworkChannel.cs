@@ -49,6 +49,13 @@ namespace Cosmos.Network
         void Connect();
         /// <summary>
         /// 发送数据到remote;
+        /// 默认为可靠类型；
+        /// </summary>
+        /// <param name="data">数据</param>
+        /// <param name="connectionId">连接Id</param>
+        void SendMessage( byte[] data, int connectionId);
+        /// <summary>
+        /// 发送数据到remote;
         /// </summary>
         /// <param name="reliableType">数据可靠类型</param>
         /// <param name="data">数据</param>

@@ -16,7 +16,7 @@ namespace CosmosEngine
         public const int MaxConnection = 5;
         Dictionary<int, Connection> connDict;
         List<Connection> connList;
-        Action<NetworkReliableType ,byte[] ,int > sendMessage;
+        Action<byte[] ,int > sendMessage;
         /// <summary>
         /// 帧率；
         /// </summary>
@@ -34,7 +34,7 @@ namespace CosmosEngine
         /// 当前帧;
         /// </summary>
         OperationData inputOpData;
-        public void SetListener(INetworkChannel channel)
+        public void SetNetworkChannel(INetworkChannel channel)
         {
             channel.OnReceiveData+= OnReceiveDataHandler;
             channel.OnConnected += OnConnect;
@@ -70,7 +70,7 @@ namespace CosmosEngine
                 var sndData = Encoding.UTF8.GetBytes(json);
                 for (int i = 0; i < length; i++)
                 {
-                    sendMessage(NetworkReliableType.Reliable, sndData, connList[i].Conv);
+                    sendMessage( sndData, connList[i].Conv);
                 }
             }
         }
@@ -120,7 +120,7 @@ namespace CosmosEngine
                 var json = Utility.Json.ToJson(opData);
                 data = Encoding.UTF8.GetBytes(json);
             }
-            sendMessage( NetworkReliableType.Reliable, data, conv);
+            sendMessage(  data, conv);
         }
         void OnDisconnect(int conv)
         {
@@ -140,7 +140,7 @@ namespace CosmosEngine
             var data = Encoding.UTF8.GetBytes(json);
             foreach (var conn in connDict)
             {
-                sendMessage(NetworkReliableType.Reliable, data, conn.Key);
+                sendMessage(data, conn.Key);
             }
         }
         void PlayerEnter(long conv)
@@ -152,7 +152,7 @@ namespace CosmosEngine
             var data = Encoding.UTF8.GetBytes(json);
             foreach (var conn in connDict)
             {
-                sendMessage(NetworkReliableType.Reliable, data, conn.Key);
+                sendMessage( data, conn.Key);
             }
         }
         void ProcessHandler(int conv, OperationData opData)

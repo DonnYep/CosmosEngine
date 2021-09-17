@@ -37,13 +37,12 @@ namespace ProtocolCore
         public void LogInfo(object msg, object context)
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"{DateTime.Now}[ - ] > LogInfo : { msg};{context}\n");
+            Console.WriteLine($"{DateTime.Now} [ - ] > INFO : {msg};{context}\n");
             Info($"{msg};{context}");
             Console.ResetColor();
         }
         /// <summary>
         /// log日志；
-        /// 调用时msgColor参考((int)ConsoleColor.White).ToString(;
         /// </summary>
         /// <param name="msg">消息体</param>
         /// <param name="msgColor">消息颜色</param>
@@ -51,17 +50,17 @@ namespace ProtocolCore
         public void LogInfo(object msg, string msgColor, object context)
         {
             var now = DateTime.Now;
-            ConsoleColor color = (ConsoleColor)int.Parse(msgColor);
+            ConsoleColor color = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), msgColor);
             Console.ForegroundColor = color;
-            Console.WriteLine($"{now}[ - ] > INFO: { msg};{context}\n");
+            Console.WriteLine($"{now} [ - ] > INFO : {msg};{context}\n");
             Info($"{msg};{context}");
             Console.ResetColor();
         }
         public void LogWarning(object msg, object context)
         {
             var now = DateTime.Now;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{now}[ - ] > WARN : { msg};{context}\n");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"{now} [ - ] > WARN : {msg};{context}\n");
             Warring(msg.ToString());
             Console.ResetColor();
         }
@@ -69,7 +68,7 @@ namespace ProtocolCore
         {
             var now = DateTime.Now;
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine($"{now}[ - ] > ERROR : { msg};{context}\n");
+            Console.WriteLine($"{now} [ - ] > ERROR : {msg};{context}\n");
             Error($"{msg};{context}");
             Console.ResetColor();
         }
@@ -80,7 +79,7 @@ namespace ProtocolCore
         {
             var now = DateTime.Now;
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"{now}[ - ] > FATAL : { msg};{context}\n");
+            Console.WriteLine($"{now} [ - ] > FATAL : {msg};{context}\n");
             Fatal($"{msg};{context}");
             Console.ResetColor();
         }
@@ -88,12 +87,12 @@ namespace ProtocolCore
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now}[ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n {st}";
+            string str = $"{DateTime.Now} [ - ] > ERROR : {msg}\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
+            string str = $"{DateTime.Now.ToString()} [ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
             Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
@@ -101,12 +100,12 @@ namespace ProtocolCore
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now}[ - ] > INFO : {msg}\nStackTrace[ - ] ：{st}";
+            string str = $"{DateTime.Now} [ - ] > INFO : {msg}\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > INFO : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
+            string str = $"{DateTime.Now.ToString()} [ - ] > INFO : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
             Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
@@ -114,12 +113,12 @@ namespace ProtocolCore
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now}[ - ] > WARN : {msg}\nStackTrace[ - ] ：{st}";
+            string str = $"{DateTime.Now} [ - ] > WARN : {msg}\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > WARN : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
+            string str = $"{DateTime.Now.ToString()} [ - ] > WARN : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
             Utility.IO.AppendWriteTextFile(logFullPath, str);
         }
@@ -127,12 +126,12 @@ namespace ProtocolCore
         {
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now}[ - ] > FATAL : {msg}\nStackTrace[ - ] ：{st}";
+            string str = $"{DateTime.Now} [ - ] > FATAL : {msg}\nStackTrace[ - ] ：{st}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()}[ - ] > FATAL : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
+            string str = $"{DateTime.Now.ToString()} [ - ] > FATAL : {msg}\nStackTrace[ - ] ：\n {st}{st0}{st1}";
 #endif
             Utility.IO.AppendWriteTextFile(logFullPath, str);
         }

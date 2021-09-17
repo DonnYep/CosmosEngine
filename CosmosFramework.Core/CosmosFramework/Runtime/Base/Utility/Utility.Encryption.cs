@@ -14,7 +14,6 @@ namespace Cosmos
         /// </summary>
         public static class Encryption
         {
-            static UTF8Encoding utf8Encoding = new UTF8Encoding(false);
             static StringBuilder stringBuilderCache = new StringBuilder(1024);
             public enum GUIDFormat
             {

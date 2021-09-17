@@ -26,7 +26,7 @@ namespace CosmosEngine
             EngineEntry.LaunchAppDomainModules();
             var serverChannel = new KCPServerChannel("KCPServer", "localhost", port);
            var channelKey = serverChannel.NetworkChannelKey;
-            EngineEntry.MultiplayManager.SetListener(serverChannel);
+            EngineEntry.MultiplayManager.SetNetworkChannel(serverChannel);
             serverChannel.Connect();
             EngineEntry.NetworkManager.AddChannel(serverChannel);
             Utility.Debug.LogInfo($"{channelKey} Start Running !");
