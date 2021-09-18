@@ -36,6 +36,10 @@ namespace Cosmos.Network
         /// </summary>
         event Action<int,byte[]> OnReceiveData;
         /// <summary>
+        /// 通道销毁事件；
+        /// </summary>
+        event Action OnAbort;
+        /// <summary>
         /// 通道的唯一识别key；
         /// </summary>
         NetworkChannelKey NetworkChannelKey { get; }

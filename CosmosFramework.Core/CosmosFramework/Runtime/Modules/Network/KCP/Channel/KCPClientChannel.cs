@@ -7,13 +7,19 @@ using kcp;
 namespace Cosmos
 {
     //================================================
-    //1、ChlientChannel启动后，维护并保持与远程服务器的连接。
-    //2、主动连接remote超过20000ms未响应时，触发超时事件被，结束连接并
-    //触发onDisconnected，返回参数NetworkChannelKey以及 -1；
-    //3、连接成功，触发onConnected并返回参数NetworkChannelKey以及-1；
-    //4、从remote接收数据，触发onReceiveData，返回byte[] 数组，-1，以及
-    //NetworkChannelKey；
-    //5、发送消息到remote，需要通过调用SendMessage方法。
+    /*
+    * 1、ChlientChannel启动后，维护并保持与远程服务器的连接。
+    * 
+    *2、主动连接remote超过20000ms未响应时，触发超时事件被，结束连接并
+    *触发onDisconnected，返回参数NetworkChannelKey以及 -1；
+    *
+    *3、连接成功，触发onConnected并返回参数NetworkChannelKey以及-1；
+    *
+    *4、从remote接收数据，触发onReceiveData，返回byte[] 数组，-1，以及
+    *NetworkChannelKey；
+    *
+    *5、发送消息到remote，需要通过调用SendMessage方法。
+    */
     //================================================
     /// <summary>
     /// KCP客户端通道；
@@ -27,7 +33,13 @@ namespace Cosmos
         Action<int> onConnected;
         Action<int> onDisconnected;
         Action<int, byte[]> onReceiveData;
+        Action onAbort;
 
+        public event Action OnAbort
+        {
+            add { onAbort += value; }
+            remove { onAbort -= value; }
+        }
         public event Action<int> OnConnected
         {
             add { onConnected += value; }
@@ -71,7 +83,7 @@ namespace Cosmos
             kcpClientService.OnClientConnected += OnConnectHandler;
             kcpClientService.OnClientDisconnected += OnDisconnectHandler;
             kcpClientService.ServiceUnpause();
-            kcpClientService.Port =port;
+            kcpClientService.Port = port;
             kcpClientService.ServiceConnect(ip);
         }
         /// <summary>
@@ -85,6 +97,7 @@ namespace Cosmos
         public void AbortChannel()
         {
             kcpClientService?.ServiceDisconnect();
+            onAbort?.Invoke();
         }
         /// <summary>
         /// 发送数据到remote;
@@ -92,7 +105,7 @@ namespace Cosmos
         /// </summary>
         /// <param name="data">数据</param>
         /// <param name="connectionId">连接Id</param>
-        public void SendMessage( byte[] data, int connectionId = -1)
+        public void SendMessage(byte[] data, int connectionId = -1)
         {
             SendMessage(NetworkReliableType.Reliable, data, connectionId);
         }
@@ -112,7 +125,7 @@ namespace Cosmos
         {
             IsConnect = false;
             Utility.Debug.LogError($"{NetworkChannelKey} disconnected ! ");
-            onDisconnected?.Invoke( -1);
+            onDisconnected?.Invoke(-1);
             onConnected = null;
             onDisconnected = null;
             onReceiveData = null;
@@ -121,7 +134,7 @@ namespace Cosmos
         {
             IsConnect = true;
             Utility.Debug.LogWarning($"{NetworkChannelKey} connected ! ");
-            onConnected?.Invoke( -1);
+            onConnected?.Invoke(-1);
         }
         void OnReceiveDataHandler(ArraySegment<byte> arrSeg, byte channel)
         {

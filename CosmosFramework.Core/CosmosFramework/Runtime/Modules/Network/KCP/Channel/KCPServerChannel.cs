@@ -8,13 +8,18 @@ using kcp;
 namespace Cosmos
 {
     //================================================
-    //1、ServerChannel启动后，接收并维护remote进入的连接;
-    //2、当有请求进入并成功建立连接时，触发onConnected，分发参数分别为
-    //NetworkChannelKey以及建立连接的conv;
-    //3、当请求断开连接，触发onDisconnected，分发NetworkChannelKey以及
-    //断开连接的conv;
-    //4、已连接对象发来数据时，触发onReceiveData，分发NetworkChannelKey
-    //以及发送来数据的conv;
+    /*
+    *1、ServerChannel启动后，接收并维护remote进入的连接;
+    *
+    *2、当有请求进入并成功建立连接时，触发onConnected，分发参数分别为
+    *NetworkChannelKey以及建立连接的conv;
+    *
+    *3、当请求断开连接，触发onDisconnected，分发NetworkChannelKey以及
+    *断开连接的conv;
+    *
+    *4、已连接对象发来数据时，触发onReceiveData，分发NetworkChannelKey
+    *以及发送来数据的conv;
+    */
     //================================================
     /// <summary>
     /// / KCP服务端通道；
@@ -27,7 +32,13 @@ namespace Cosmos
         Action<int> onConnected;
         Action<int> onDisconnected;
         Action<int, byte[]> onReceiveData;
+        Action onAbort;
 
+        public event Action OnAbort
+        {
+            add { onAbort += value; }
+            remove { onAbort -= value; }
+        }
         public event Action<int> OnConnected
         {
             add { onConnected += value; }
@@ -77,6 +88,7 @@ namespace Cosmos
             kcpServerService.OnServerDisconnected -= OnDisconnectedHandler;
             kcpServerService.OnServerConnected -= OnConnectedHandler;
             kcpServerService?.ServerServiceStop();
+            onAbort?.Invoke();
         }
         public void TickRefresh()
         {
