@@ -78,5 +78,11 @@ namespace Cosmos.Network
         /// 轮询消息通道；
         /// </summary>
         void TickRefresh();
+        /// <summary>
+        /// 获取连接Id的地址；
+        /// </summary>
+        /// <param name="connectionId">连接Id</param>
+        /// <returns></returns>
+        string GetconnectionAddress(int connectionId);
     }
 }

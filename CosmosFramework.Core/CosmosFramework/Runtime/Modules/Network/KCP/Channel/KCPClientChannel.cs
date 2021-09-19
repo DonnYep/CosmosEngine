@@ -121,6 +121,16 @@ namespace Cosmos
             var byteType = (byte)reliableType;
             kcpClientService?.ServiceSend((KcpChannel)byteType, arraySegment);
         }
+        /// <summary>
+        /// 获取连接Id的地址；
+        /// </summary>
+        /// <param name="connectionId">连接Id</param>
+        /// <returns></returns>
+        public string GetconnectionAddress(int connectionId)
+        {
+            //客户端通道仅返回本地地址；
+            return System.Net.Dns.GetHostName();
+        }
         void OnDisconnectHandler()
         {
             IsConnect = false;
