@@ -7,45 +7,26 @@ namespace Cosmos
 {
     public partial class TickTimer
     {
-        class TickTaskInfo
-        {
-            public int TaskId { get; }
-            public Action<int> Callbak { get; }
-            public TickTaskInfo(int taskId, Action<int> callbak)
-            {
-                TaskId = taskId;
-                Callbak = callbak;
-            }
-        }
         public Action<string> LogInfo { get; set; }
         public Action<string> LogWarn { get; set; }
         public Action<string> LogError { get; set; }
 
         readonly DateTime startDateTime = new DateTime(1970, 1, 1, 0, 0, 0);
         readonly ConcurrentDictionary<int, TickTask> taskDict;
-        /// <summary>
-        /// 缓存池；
-        /// </summary>
-        readonly ConcurrentQueue<TickTaskInfo> taskCacheQue;
-        /// <summary>
-        /// 启用缓存；
-        /// </summary>
-        readonly bool enableCache;
         readonly object locker = new object();
         readonly Thread timerThread;
         int TaskId = 0;
+        int tickInterval;
 
-        public TickTimer(int interval = 0, bool enableCache = true)
+        public TickTimer(int interval = 0)
         {
-            this.enableCache = enableCache;
-            if (enableCache)
-            {
-                taskCacheQue = new ConcurrentQueue<TickTaskInfo>();
-            }
+            if (interval < 0)
+                throw new ArgumentException($"{nameof (interval)} is invalid !" );
+            tickInterval = interval;
             taskDict = new ConcurrentDictionary<int, TickTask>();
             if (interval != 0)
             {
-                timerThread = new Thread(new ThreadStart(() => StartTick(interval)));
+                timerThread = new Thread(new ThreadStart(() => RunTick()));
                 timerThread.Start();
             }
         }
@@ -68,14 +49,7 @@ namespace Cosmos
         {
             if (taskDict.TryRemove(taskId, out TickTask task))
             {
-                if (enableCache&&task.CancelCallback != null)
-                {
-                    taskCacheQue.Enqueue(new TickTaskInfo(taskId, task.CancelCallback));
-                }
-                else
-                {
-                    task.CancelCallback?.Invoke(taskId);
-                }
+                task.CancelCallback?.Invoke(taskId);
                 return true;
             }
             else
@@ -113,17 +87,9 @@ namespace Cosmos
                     TaskCallback(task.TaskId, task.TaskCallback);
                 }
             }
-            while (taskCacheQue != null && taskCacheQue.Count > 0)
-            {
-                if (taskCacheQue.TryDequeue(out var pack))
-                {
-                    pack.Callbak.Invoke(pack.TaskId);
-                }
-            }
         }
         public void Reset()
         {
-            taskCacheQue.Clear();
             taskDict.Clear();
             if (timerThread != null)
             {
@@ -148,14 +114,14 @@ namespace Cosmos
                 }
             }
         }
-        void StartTick(int interval)
+        void RunTick()
         {
             try
             {
                 while (true)
                 {
                     TickRefresh();
-                    Thread.Sleep(interval);
+                    Thread.Sleep(tickInterval);
                 }
             }
             catch (ThreadAbortException e)
@@ -165,7 +131,6 @@ namespace Cosmos
         }
         void TaskCallback(int taskId, Action<int> taskCallback)
         {
-            taskCacheQue.Enqueue(new TickTaskInfo(taskId, taskCallback));
             taskCallback.Invoke(taskId);
         }
         void FinishTask(int tid)
