@@ -141,40 +141,11 @@ namespace SUDP
 
             return 0;
         }
-
-        //确认包接收线程函数
-        private void Listen()
-        {
-            IPEndPoint ipep = new IPEndPoint(IPAddress.Any, 0);
-            try
-            {
-                while (true)
-                {
-                    byte[] confirm = client.Receive(ref ipep);
-
-                    if ((int)confirm[0] == groupSeq)//收到确认
-                    {
-                        confirmEvent.Set();//激活接收确认事件
-                    }
-                    else if (confirm[0] == 0xFF)//传输中断命令
-                    {
-                        error = true;
-                        break;
-                    }
-                }
-            }
-            catch//异常
-            {
-                error = true;
-            }
-        }
-
         //数据接收函数,返回值0:接收成功,-1:接收失败
         public int Receive(ref Stream stream)
         {
             return Receive(ref stream, defaultPacketSize, defaultGroupSize);
         }
-
         public int Receive(ref Stream stream, int packetSize, int groupSize)
         {
             IPEndPoint ipep = new IPEndPoint(IPAddress.Any, 0);
@@ -272,6 +243,32 @@ namespace SUDP
 
             client.Client.ReceiveTimeout = socketRecieveTimeOut;
             return 0;
+        }
+        //确认包接收线程函数
+        private void Listen()
+        {
+            IPEndPoint ipep = new IPEndPoint(IPAddress.Any, 0);
+            try
+            {
+                while (true)
+                {
+                    byte[] confirm = client.Receive(ref ipep);
+
+                    if ((int)confirm[0] == groupSeq)//收到确认
+                    {
+                        confirmEvent.Set();//激活接收确认事件
+                    }
+                    else if (confirm[0] == 0xFF)//传输中断命令
+                    {
+                        error = true;
+                        break;
+                    }
+                }
+            }
+            catch//异常
+            {
+                error = true;
+            }
         }
     }
 }

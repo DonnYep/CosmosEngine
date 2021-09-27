@@ -16,9 +16,9 @@ namespace ProtocolCore
         /// </summary>
         public ConsoleDebugHelper()
         {
-            this.logFullPath = Utility.IO.WebPathCombine(defaultLogPath, "ServerDebug.log");
+            this.logFullPath = Utility.IO.WebPathCombine(defaultLogPath, "Server.log");
             LogInfo("Log file path : " + logFullPath, null);
-            File.WriteAllText(logFullPath, "Head", Encoding.UTF8);
+            AppendWriteTextFile(logFullPath, "Head");
             System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
         }
         public ConsoleDebugHelper(string logFullPath)
@@ -26,7 +26,7 @@ namespace ProtocolCore
             LogInfo("Log file path : " + logFullPath, null);
             Utility.Text.IsStringValid(logFullPath, "LogFullPath is invalid !");
             this.logFullPath = logFullPath;
-            File.WriteAllText(logFullPath, "Head", Encoding.UTF8);
+            AppendWriteTextFile(logFullPath, "Head");
             System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
         }
         public void LogInfo(object msg, object context)
@@ -89,7 +89,7 @@ namespace ProtocolCore
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now.ToString()} [ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
 #endif
-            Utility.IO.AppendWriteTextFile(logFullPath, str);
+            AppendWriteTextFile(logFullPath, str);
         }
         void Info(string msg)
         {
@@ -102,7 +102,7 @@ namespace ProtocolCore
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now.ToString()} [ - ] > INFO : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
 #endif
-            Utility.IO.AppendWriteTextFile(logFullPath, str);
+            AppendWriteTextFile(logFullPath, str);
         }
         void Warring(string msg)
         {
@@ -115,7 +115,7 @@ namespace ProtocolCore
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now.ToString()} [ - ] > WARN : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
 #endif
-            Utility.IO.AppendWriteTextFile(logFullPath, str);
+            AppendWriteTextFile(logFullPath, str);
         }
         void Fatal(string msg)
         {
@@ -128,7 +128,19 @@ namespace ProtocolCore
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now.ToString()} [ - ] > FATAL : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
 #endif
-            Utility.IO.AppendWriteTextFile(logFullPath, str);
+            AppendWriteTextFile(logFullPath, str);
+        }
+        void AppendWriteTextFile(string fileFullPath, string context)
+        {
+            using (FileStream stream = new FileStream(fileFullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+            {
+                stream.Position = stream.Length;
+                using (StreamWriter writer = new StreamWriter(stream, Encoding.UTF8))
+                {
+                    writer.WriteLine(context);
+                    writer.Flush();
+                }
+            }
         }
         /// <summary>
         /// 全局异常捕获器

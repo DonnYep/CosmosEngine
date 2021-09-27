@@ -62,7 +62,7 @@ namespace Cosmos
         {
             NetworkChannelKey = new NetworkChannelKey(channelName, $"{ip}:{port}");
             KCPLog.Info = (s) => Utility.Debug.LogInfo(s);
-            KCPLog.Warning = (s) => Utility.Debug.LogInfo(s, MessageColor.YELLOW);
+            KCPLog.Warning = (s) => Utility.Debug.LogWarning(s);
             KCPLog.Error = (s) => Utility.Debug.LogError(s);
             this.ip = ip;
             this.port = port;

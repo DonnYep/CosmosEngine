@@ -25,7 +25,7 @@ namespace Cosmos.Network
         /// ChannelName===INetworkChannel
         /// </summary>
         ConcurrentDictionary<NetworkChannelKey, INetworkChannel> channelDict;
-        public int NetworkChannelCount { get{return channelDict.Count;} }
+        public int NetworkChannelCount { get { return channelDict.Count; } }
         public NetworkChannelKey[] NetworkChannelKeys { get { return channelDict.Keys.ToArray(); } }
         public bool AddChannel(INetworkChannel channel)
         {
@@ -69,10 +69,10 @@ namespace Cosmos.Network
         }
         public NetworkChannelInfo GetChannelInfo(NetworkChannelKey channelKey)
         {
-            if( channelDict.TryGetValue(channelKey, out var channel))
+            if (channelDict.TryGetValue(channelKey, out var channel))
             {
                 var info = new NetworkChannelInfo();
-                info.IPAddress= channel.NetworkChannelKey.ChannelIPAddress;
+                info.IPAddress = channel.NetworkChannelKey.ChannelIPAddress;
                 info.Name = channel.NetworkChannelKey.ChannelName;
                 return info;
             }
@@ -85,26 +85,32 @@ namespace Cosmos.Network
                 channel.SendMessage(reliableType, data, connectionId);
             }
         }
-        public void Connect(NetworkChannelKey channelKey)
+        public bool Connect(NetworkChannelKey channelKey)
         {
             if (channelDict.TryGetValue(channelKey, out var channel))
             {
                 channel.Connect();
+                return true;
             }
+            return false;
         }
-        public void Disconnect(NetworkChannelKey channelKey, int connectionId)
+        public bool Disconnect(NetworkChannelKey channelKey, int connectionId)
         {
             if (channelDict.TryGetValue(channelKey, out var channel))
             {
                 channel.Disconnect(connectionId);
+                return true;
             }
+            return false;
         }
-        public void AbortChannel(NetworkChannelKey channelKey)
+        public bool AbortChannel(NetworkChannelKey channelKey)
         {
-            if (channelDict.TryGetValue(channelKey, out var channel))
+            if (channelDict.TryRemove(channelKey, out var channel))
             {
                 channel.AbortChannel();
+                return true;
             }
+            return false;
         }
         protected override void OnInitialization()
         {
