@@ -33,7 +33,7 @@ namespace CosmosEngine
         /// <summary>
         /// 当前帧;
         /// </summary>
-        OperationData inputOpData;
+        MultiplayData inputOpData;
         public void SetNetworkChannel(INetworkChannel channel)
         {
             channel.OnReceiveData+= OnReceiveDataHandler;
@@ -46,7 +46,7 @@ namespace CosmosEngine
             connDict = new Dictionary<int, Connection>();
             connList = new List<Connection>();
             frameInputData = new List<FixTransportData>();
-            inputOpData = new OperationData((byte)MultiplayOperationCode.PlayerInput);
+            inputOpData = new MultiplayData((byte)MultiplayOperationCode.PlayerInput);
             Interval = (int)1000 / FrameRate;
             latestTime = Utility.Time.MillisecondNow() + Interval;
         }
@@ -79,7 +79,7 @@ namespace CosmosEngine
             try
             {
                 var json = Encoding.UTF8.GetString(data);
-                var opData = Utility.Json.ToObject<OperationData>(json);
+                var opData = Utility.Json.ToObject<MultiplayData>(json);
                 ProcessHandler(conv, opData);
             }
             catch (Exception e)
@@ -89,7 +89,7 @@ namespace CosmosEngine
         }
         void OnConnect(int conv)
         {
-            OperationData opData = new OperationData();
+            MultiplayData opData = new MultiplayData();
             byte[] data = null;
             if (MaxConnection >= connDict.Count)
             {
@@ -127,14 +127,14 @@ namespace CosmosEngine
             if (connDict.Remove(conv, out var conn))
             {
                 connList.Remove(conn);
-                OperationData opData = new OperationData();
+                MultiplayData opData = new MultiplayData();
                 opData.OperationCode = (byte)MultiplayOperationCode.PlayerExit;
                 opData.DataContract = conv;
                 BroadCastMessage(opData);
                 Utility.Debug.LogWarning($"conv {conv} disconnected；current Connection count : {connDict.Count},");
             }
         }
-        void BroadCastMessage(OperationData opData)
+        void BroadCastMessage(MultiplayData opData)
         {
             var json = Utility.Json.ToJson(opData);
             var data = Encoding.UTF8.GetBytes(json);
@@ -145,7 +145,7 @@ namespace CosmosEngine
         }
         void PlayerEnter(long conv)
         {
-            OperationData opData = new OperationData();
+            MultiplayData opData = new MultiplayData();
             opData.OperationCode = (byte)MultiplayOperationCode.PlayerEnter;
             opData.DataContract = conv;
             var json = Utility.Json.ToJson(opData);
@@ -155,7 +155,7 @@ namespace CosmosEngine
                 sendMessage( data, conn.Key);
             }
         }
-        void ProcessHandler(int conv, OperationData opData)
+        void ProcessHandler(int conv, MultiplayData opData)
         {
             var opCode = (MultiplayOperationCode)opData.OperationCode;
             switch (opCode)
