@@ -6,14 +6,14 @@ using System.Text;
 
 namespace Cosmos
 {
-    public sealed partial class GameManager 
+    internal static class GameManager
     {
         #region Properties
         /// <summary>
         /// 轮询更新委托
         /// </summary>
-        internal static Action tickRefreshHandler;
-        public static event Action TickRefreshHandler
+        static Action tickRefreshHandler;
+        internal static event Action TickRefreshHandler
         {
             add { tickRefreshHandler += value; }
             remove { tickRefreshHandler -= value; }
@@ -22,12 +22,17 @@ namespace Cosmos
         /// 时间流逝轮询委托；
         /// </summary>
         static Action<long> elapseRefreshHandler;
-        public static bool IsPause { get; private set; }
+        internal static event Action<long> ElapseRefreshHandler
+        {
+            add { elapseRefreshHandler += value; }
+            remove { elapseRefreshHandler -= value; }
+        }
+        internal static bool IsPause { get; private set; }
         internal static System.Reflection.Assembly[] Assemblies { get; private set; }
         //当前注册的模块总数
         static int moduleCount = 0;
         internal static int ModuleCount { get { return moduleCount; } }
-        internal static bool PrintModulePreparatory { get; set; } 
+        internal static bool PrintModulePreparatory { get; set; }
 
         /// <summary>
         /// 模块字典；
@@ -63,49 +68,18 @@ namespace Cosmos
         /// </summary>
         /// <typeparam name="T">内置模块接口</typeparam>
         /// <returns>模板模块接口</returns>
-        public static T GetModule<T>() where T : class, IModuleManager
+        internal static T GetModule<T>() where T : class, IModuleManager
         {
             Type interfaceType = typeof(T);
             var hasType = interfaceModuleDict.TryGetValue(interfaceType, out var derivedType);
             if (!hasType)
-            {
-                foreach (var m in moduleDict)
-                {
-                    if (interfaceType.IsAssignableFrom(m.Key))
-                    {
-                        derivedType = m.Key;
-                        interfaceModuleDict.TryAdd(interfaceType, derivedType);
-                        break;
-                    }
-                }
-            }
+                return null;
             moduleDict.TryGetValue(derivedType, out var module);
             return module as T;
         }
-        public static void PreparatoryModule()
-        {
-            foreach (var module in moduleDict.Keys)
-            {
-                Utility.Debug.LogInfo($"Module :{module} has  been initialized");
-            }
-        }
-        public static void Dispose()
+        internal static void Dispose()
         {
             OnDeactive();
-        }
-        /// <summary>
-        /// 构造函数，只有使用到时候才产生
-        /// </summary>
-        static GameManager()
-        {
-            if (moduleDict == null)
-            {
-                moduleDict = new ConcurrentDictionary<Type, Module>();
-                tickRefreshDict = new Dictionary<object, Action>();
-                interfaceModuleDict = new Dictionary<Type, Type>();
-                moduleInitExceptionList = new List<Exception>();
-                moduleTerminateExceptionList = new List<Exception>();
-            }
         }
         internal static void OnPause()
         {
@@ -160,6 +134,8 @@ namespace Cosmos
             if (assemblies == null)
                 throw new ArgumentNullException("InitAssemblyModule : assemblies is invalid");
             Assemblies = assemblies;
+            InitDicts();
+            var ModuleManagerType = typeof(IModuleManager);
             var assemblyLength = assemblies.Length;
             for (int h = 0; h < assemblyLength; h++)
             {
@@ -167,21 +143,34 @@ namespace Cosmos
                 for (int i = 0; i < modules.Length; i++)
                 {
                     var type = modules[i].GetType();
-                    if (typeof(IModuleManager).IsAssignableFrom(type))
+                    var module = modules[i];
+                    if (ModuleManagerType.IsAssignableFrom(type))
                     {
-                        if (!HasModule(type))
+                        if (!moduleDict.ContainsKey(type))
                         {
-                            if (moduleDict.TryAdd(type, modules[i]))
+                            try
                             {
-                                try
+                                var interfaces = type.GetInterfaces();
+                                Type interfaceType = null;
+                                foreach (var inter in interfaces)
                                 {
+                                    if (inter.Name.Contains(type.Name))
+                                    {
+                                        interfaceType = inter;
+                                        break;
+                                    }
+                                }
+                                if (interfaceType != null)
+                                {
+                                    moduleDict.TryAdd(type, module);
+                                    interfaceModuleDict.TryAdd(interfaceType, type);
                                     Utility.Assembly.InvokeMethod(modules[i], LifecycleMethodsConstant.OnInitialization);
                                     moduleCount++;
                                 }
-                                catch (Exception e)
-                                {
-                                    Utility.Debug.LogError(e);
-                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Utility.Debug.LogError(e);
                             }
                         }
                         else
@@ -195,6 +184,8 @@ namespace Cosmos
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             Assemblies = assemblies;
+            InitDicts();
+            var ModuleManagerType = typeof(IModuleManager);
             var assemblyLength = assemblies.Length;
             for (int h = 0; h < assemblyLength; h++)
             {
@@ -202,22 +193,34 @@ namespace Cosmos
                 for (int i = 0; i < modules.Length; i++)
                 {
                     var type = modules[i].GetType();
-                    if (typeof(IModuleManager).IsAssignableFrom(type))
+                    var module = modules[i];
+                    if (ModuleManagerType.IsAssignableFrom(type))
                     {
-
-                        if (!HasModule(type))
+                        if (!moduleDict.ContainsKey(type))
                         {
-                            if (moduleDict.TryAdd(type, modules[i]))
+                            try
                             {
-                                try
+                                var interfaces = type.GetInterfaces();
+                                Type interfaceType = null;
+                                foreach (var inter in interfaces)
                                 {
+                                    if (inter.Name.Contains(type.Name))
+                                    {
+                                        interfaceType = inter;
+                                        break;
+                                    }
+                                }
+                                if (interfaceType != null)
+                                {
+                                    moduleDict.TryAdd(type, module);
+                                    interfaceModuleDict.TryAdd(interfaceType, type);
                                     Utility.Assembly.InvokeMethod(modules[i], LifecycleMethodsConstant.OnInitialization);
                                     moduleCount++;
                                 }
-                                catch (Exception e)
-                                {
-                                    Utility.Debug.LogError(e);
-                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Utility.Debug.LogError(e);
                             }
                         }
                         else
@@ -323,7 +326,19 @@ namespace Cosmos
                 throw new AggregateException(arr);
             }
         }
+        static void InitDicts()
+        {
+            if (moduleDict == null)
+            {
+                moduleDict = new ConcurrentDictionary<Type, Module>();
+                interfaceModuleDict = new Dictionary<Type, Type>();
 
+                moduleInitExceptionList = new List<Exception>();
+                moduleTerminateExceptionList = new List<Exception>();
+
+                tickRefreshDict = new Dictionary<object, Action>();
+            }
+        }
         #endregion
     }
 }

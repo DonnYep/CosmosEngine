@@ -6,6 +6,6 @@ namespace CosmosEngine
 {
     public class EngineEntry:CosmosEntry
     {
-        public static IMultiplayManager  MultiplayManager{ get { return GameManager.GetModule<IMultiplayManager>(); } }
+        public static IServiceManager ServiceManager { get { return GetModule<IServiceManager>(); } }
     }
 }

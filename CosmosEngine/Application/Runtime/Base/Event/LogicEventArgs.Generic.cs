@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-namespace Cosmos
+namespace CosmosEngine
 {
     /// <summary>
     /// 泛型数据传输容器

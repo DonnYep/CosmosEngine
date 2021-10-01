@@ -9,8 +9,14 @@ namespace Cosmos
     /// <summary>
     /// Cosmos服务端入口；
     /// </summary>
-    public class CosmosEntry 
+    public class CosmosEntry
     {
+        public static event Action TickRefreshHandler
+        {
+            add { GameManager.TickRefreshHandler += value; }
+            remove { GameManager.TickRefreshHandler -= value; }
+        }
+        public static int ModuleCount { get { return GameManager.ModuleCount; } }
         public static bool IsPause { get; private set; }
         public static bool Pause
         {
@@ -30,10 +36,11 @@ namespace Cosmos
                 }
             }
         }
-        public static IFSMManager FSMManager { get { return GameManager.GetModule<IFSMManager>(); } }
-        public static IConfigManager ConfigManager { get { return GameManager.GetModule<IConfigManager>(); } }
-        public static INetworkManager NetworkManager { get { return GameManager.GetModule<INetworkManager>(); } }
-        public static IEventManager EventManager { get { return GameManager.GetModule<IEventManager>(); } }
+        public static IFSMManager FSMManager { get { return GetModule<IFSMManager>(); } }
+        public static IConfigManager ConfigManager { get { return GetModule<IConfigManager>(); } }
+        public static INetworkManager NetworkManager { get { return GetModule<INetworkManager>(); } }
+        public static IEventManager EventManager { get { return GetModule<IEventManager>(); } }
+
         /// <summary>
         /// 启动当前AppDomain下的helper
         /// </summary>
@@ -112,7 +119,7 @@ namespace Cosmos
         {
             GameManager.Dispose();
         }
-        public  static void Run()
+        public static void Run()
         {
             while (true)
             {
@@ -135,6 +142,10 @@ namespace Cosmos
         public static void OnUnPause()
         {
             GameManager.OnUnPause();
+        }
+        public static T GetModule<T>() where T : class, IModuleManager
+        {
+            return GameManager.GetModule<T>();
         }
     }
 }

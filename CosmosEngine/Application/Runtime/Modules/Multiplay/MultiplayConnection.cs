@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CosmosEngine
 {
-    public class Connection
+    public class MultiplayConnection
     {
         public int Conv { get; set; }
         public FixTransportData TransportData { get; set; }

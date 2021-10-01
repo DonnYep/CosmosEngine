@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Cosmos;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cosmos
+namespace CosmosEngine
 {
     /// <summary>
     /// 并发泛型数据传输容器

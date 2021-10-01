@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Cosmos;
-using Cosmos.Network;
 
 namespace CosmosEngine
 {
@@ -14,8 +13,8 @@ namespace CosmosEngine
     public class MultiplayManager : Module, IMultiplayManager
     {
         public const int MaxConnection = 5;
-        Dictionary<int, Connection> connDict;
-        List<Connection> connList;
+        Dictionary<int, MultiplayConnection> connDict;
+        List<MultiplayConnection> connList;
         Action<byte[] ,int > sendMessage;
         /// <summary>
         /// 帧率；
@@ -34,21 +33,19 @@ namespace CosmosEngine
         /// 当前帧;
         /// </summary>
         MultiplayData inputOpData;
-        public void SetNetworkChannel(INetworkChannel channel)
-        {
-            channel.OnReceiveData+= OnReceiveDataHandler;
-            channel.OnConnected += OnConnect;
-            channel.OnDisconnected+= OnDisconnect;
-            sendMessage = channel.SendMessage;
-        }
         protected override void OnPreparatory()
         {
-            connDict = new Dictionary<int, Connection>();
-            connList = new List<Connection>();
+            connDict = new Dictionary<int, MultiplayConnection>();
+            connList = new List<MultiplayConnection>();
             frameInputData = new List<FixTransportData>();
             inputOpData = new MultiplayData((byte)MultiplayOperationCode.PlayerInput);
             Interval = (int)1000 / FrameRate;
             latestTime = Utility.Time.MillisecondNow() + Interval;
+
+            EngineEntry.ServiceManager.OnReceiveData += OnReceiveDataHandler;
+            EngineEntry.ServiceManager.OnConnected += OnConnect;
+            EngineEntry.ServiceManager.OnDisconnected += OnDisconnect;
+            sendMessage = EngineEntry.ServiceManager.SendMessage; ;
         }
         [TickRefresh]
         void OnRefresh()
@@ -109,7 +106,7 @@ namespace CosmosEngine
                 opData.DataContract = Utility.Json.ToJson(messageDict);
                 var json = Utility.Json.ToJson(opData);
                 data = Encoding.UTF8.GetBytes(json);
-                var conn = new Connection() { Conv = conv };
+                var conn = new MultiplayConnection() { Conv = conv };
                 connList.Add(conn);
                 connDict.TryAdd(conv, conn);
             }

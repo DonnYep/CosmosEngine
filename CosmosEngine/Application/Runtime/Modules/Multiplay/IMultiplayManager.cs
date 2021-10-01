@@ -8,6 +8,5 @@ namespace CosmosEngine
 {
     public interface IMultiplayManager:IModuleManager
     {
-        void SetNetworkChannel(INetworkChannel channel);
     }
 }

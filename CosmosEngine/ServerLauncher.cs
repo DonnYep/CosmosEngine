@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using kcp;
 using System.Threading;
 using Cosmos;
 using System.Runtime.InteropServices;
-using Cosmos.Network;
-
 namespace CosmosEngine
 {
     public class ServerLauncher
     {
-        static ushort port = 8531;
-
         delegate bool ControlCtrlDelegate(int CtrlType);
         [DllImport("kernel32.dll")]
         static extern bool SetConsoleCtrlHandler(ControlCtrlDelegate HandlerRoutine, bool Add);
@@ -29,17 +24,11 @@ namespace CosmosEngine
 
         public static void Main(string[] args)
         {
-            Console.Title = "KCPServer";
+            Console.Title = "Server";
             SetConsoleCtrlHandler(consoleDelegate, true);
             DisbleQuickEditMode();
             EngineEntry.LaunchAppDomainHelpers();
             EngineEntry.LaunchAppDomainModules();
-            var serverChannel = new KCPServerChannel("KCPServer", "localhost", port);
-           var channelKey = serverChannel.NetworkChannelKey;
-            EngineEntry.MultiplayManager.SetNetworkChannel(serverChannel);
-            serverChannel.Connect();
-            EngineEntry.NetworkManager.AddChannel(serverChannel);
-            Utility.Debug.LogInfo($"{channelKey} Start Running !");
             EngineEntry.Run();
         }
         static bool HandlerRoutine(int CtrlType)

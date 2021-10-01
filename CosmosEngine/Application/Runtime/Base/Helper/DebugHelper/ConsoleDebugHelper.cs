@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Cosmos;
-namespace ProtocolCore
+namespace CosmosEngine
 {
     [Implementer]
     public class ConsoleDebugHelper : Utility.Debug.IDebugHelper
@@ -56,7 +56,7 @@ namespace ProtocolCore
             var now = DateTime.Now;
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine($"{now} [ - ] > WARN : {msg};{context}");
-            Warring(msg.ToString());
+            Warring($"{msg};{context}");
             Console.ResetColor();
         }
         public void LogError(object msg, object context)
@@ -80,6 +80,8 @@ namespace ProtocolCore
         }
         void Error(string msg)
         {
+            if (string.IsNullOrEmpty(msg))
+                return;
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now} [ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n{st}";
@@ -93,6 +95,8 @@ namespace ProtocolCore
         }
         void Info(string msg)
         {
+            if (string.IsNullOrEmpty(msg))
+                return;
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now} [ - ] > INFO : {msg}\nStackTrace[ - ] ：\n{st}";
@@ -106,6 +110,8 @@ namespace ProtocolCore
         }
         void Warring(string msg)
         {
+            if (string.IsNullOrEmpty(msg))
+                return;
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now} [ - ] > WARN : {msg}\nStackTrace[ - ] ：\n{st}";
@@ -119,6 +125,8 @@ namespace ProtocolCore
         }
         void Fatal(string msg)
         {
+            if (string.IsNullOrEmpty(msg))
+                return;
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
             string str = $"{DateTime.Now} [ - ] > FATAL : {msg}\nStackTrace[ - ] ：\n{st}";
