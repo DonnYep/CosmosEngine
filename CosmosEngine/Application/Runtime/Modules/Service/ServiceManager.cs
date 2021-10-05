@@ -11,8 +11,7 @@ namespace CosmosEngine
     [Module]
     public class ServiceManager : Module, IServiceManager
     {
-        const ushort port = 8531;
-
+        const ushort port = 8566;
         Action<int> onConnected;
         public event Action<int> OnConnected
         {
@@ -42,8 +41,8 @@ namespace CosmosEngine
             networkChannel.OnConnected += OnConnectedHandle;
             networkChannel.OnDisconnected += OnDisconnectedHandle;
             networkChannel.OnReceiveData += OnReceiveDataHandle;
-            EngineEntry.NetworkManager.AddChannel(networkChannel);
             networkChannel.Connect();
+            CosmosEntry.NetworkManager.AddChannel(networkChannel);
             Utility.Debug.LogInfo(networkChannel.NetworkChannelKey + " Start Running");
         }
         void OnReceiveDataHandle(int conv, byte[] data)

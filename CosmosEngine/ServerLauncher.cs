@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using Cosmos;
 using System.Runtime.InteropServices;
+
 namespace CosmosEngine
 {
     public class ServerLauncher
@@ -24,12 +25,12 @@ namespace CosmosEngine
 
         public static void Main(string[] args)
         {
-            Console.Title = "Server";
+            Console.Title = "CosmosLockstepServer";
             SetConsoleCtrlHandler(consoleDelegate, true);
             DisbleQuickEditMode();
-            EngineEntry.LaunchAppDomainHelpers();
-            EngineEntry.LaunchAppDomainModules();
-            EngineEntry.Run();
+            ServerEntry.LaunchAppDomainHelpers();
+            ServerEntry.LaunchAppDomainModules();
+            ServerEntry.Run();
         }
         static bool HandlerRoutine(int CtrlType)
         {

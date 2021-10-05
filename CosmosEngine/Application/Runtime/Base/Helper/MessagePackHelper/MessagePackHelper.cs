@@ -8,9 +8,9 @@ namespace CosmosEngine
     using MessagePack;
     using MessagePack.Resolvers;
     [Implementer]
-    public class ImplMessagePackHelper : Utility.MessagePack.IMessagePackHelper
+    public class MessagePackHelper : Utility.MessagePack.IMessagePackHelper
     {
-        public ImplMessagePackHelper()
+        public MessagePackHelper()
         {
             StaticCompositeResolver.Instance.Register(
                         //GeneratedResolver.Instance,
