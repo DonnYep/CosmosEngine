@@ -1,6 +1,6 @@
 # CosmosEngine
 
- CosmosEngine是一款轻量级的服务器框架，提供高速可靠UDP传输协议。适用于轻量高同步应用。
+ CosmosEngine是一款轻量级的服务器框架，提供高速可靠UDP传输协议。网络模块支持多服务器交互，可扩展成分布式服务。默认使用KCP进行传输，服务稳定性能高效。
 
 ## 环境
 
@@ -10,7 +10,7 @@
 
 - **Event**：标准事件中心。提供的事件监听、派发皆为线程安全类型。
 
-- **Network**：网络模块。网络模块提供了几种可靠高速的UDP协议,包含有：KCP、RUDP、SUDP等，皆可开箱即用。默认使用KCP。
+- **Network**：网络模块。网络模块提供了几种可靠高速的UDP协议,默认使用KCP。网络以通道(Channel)形式区分各个连接，支持多种网络类型同时连接。可同时实现作为客户端(Client)以及服务器(Server),可自定义扩展成分布式。
 
 - **Config**：配置模块。提供服务器初始化时加载解析配置文件服务。Runtime时可由其他模块进行存取修改。
 
@@ -26,17 +26,19 @@
 
 - **EventCore** ：轻量级事件模块，可自定义监听的数据类型；
 
-## 内置架构 MVVM
+## 内置架构 PureMVC
 
-- MVVM是基于PureMVC改进的更适于理解的软件架构。对Command、Mediator、Proxy注册使用基本与PureMVC相同。
+- 基于原始PureMVC改进的更适于理解的架构。
     框架提供了基于特性更加简洁的注册方式：
-    - 1、MVVMCommandAttribute，对应Command，即C或MV层；
-    - 2、MVVMMediatorAttribute，对应Mediator，即V层；
-    - 3、MVVMProxyAttribute，对应Proxy，即M层；
+    - 1、MVCCommandAttribute，对应Command，即C层；
+    - 2、MVCMediatorAttribute，对应Mediator，即V层；
+    - 3、MVCProxyAttribute，对应Proxy，即M层；
     
-- MVVM自动注册只需在入口调用MVVM.RegisterAttributedMVVM()方法即可。
+- MVC自动注册只需在入口调用MVC.RegisterAttributedMVC()方法即可。
 
-- 需要注意，MVVM.RegisterAttributedMVVM()方法需要传入对应的程序集。目前已经验证跨程序集反射MVVM成员是可行且稳定的。
+- 派生的代理类需要覆写构造函数，并传入NAME参数。
+
+- 需要注意，MVC.RegisterAttributedMVC()方法需要传入对应的程序集。支持多程序集反射。
 
 ## 注意事项
 

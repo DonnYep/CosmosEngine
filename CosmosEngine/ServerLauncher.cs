@@ -25,7 +25,7 @@ namespace CosmosEngine
 
         public static void Main(string[] args)
         {
-            Console.Title = "CosmosLockstepServer";
+            Console.Title = "LockstepServer";
             SetConsoleCtrlHandler(consoleDelegate, true);
             DisbleQuickEditMode();
             ServerEntry.LaunchAppDomainHelpers();

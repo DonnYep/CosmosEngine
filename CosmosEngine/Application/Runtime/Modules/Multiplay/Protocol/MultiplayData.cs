@@ -26,6 +26,8 @@ namespace CosmosEngine
             var returnCode = new byte[1];
             returnCode[0] = multiplayData.ReturnCode;
             var msgBytes = multiplayData.DataContract;
+            if (msgBytes == null)
+                msgBytes = new byte[0];
             var data = new byte[msgBytes.Length + 4];
             Array.Copy(opCode, 0, data, 0, 1);
             Array.Copy(subOpCode, 0, data, 1, 2);
