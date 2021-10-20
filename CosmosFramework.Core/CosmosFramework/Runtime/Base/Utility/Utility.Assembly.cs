@@ -550,6 +550,8 @@ where K : class
                     throw new ArgumentNullException("Type is invalid !");
                 if (attributeType == null)
                     throw new ArgumentNullException("AttributeType is invalid !");
+                if (typeof(Attribute).IsAssignableFrom(attributeType))
+                    throw new NotImplementedException($"{ attributeType } is not inherit from Attribute!");
                 return type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).
                     Where(m => m.GetCustomAttributes(attributeType, inherit).Length > 0).ToArray();
             }
@@ -567,6 +569,27 @@ where K : class
                     throw new ArgumentNullException("Type is invalid !");
                 return type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).
                     Where(m => m.GetCustomAttributes<T>(inherit).Count() > 0).ToArray();
+            }
+            /// <summary>
+            /// 获取当前程序集下所有标记指定特效的方法信息；
+            /// </summary>
+            /// <typeparam name="T">特性类型</typeparam>
+            /// <param name="assembly">目标程序集</param>
+            /// <returns>方法信息数组</returns>
+            public static MethodInfo[] GetAssemblyMethodsByAttribute<T>(System.Reflection.Assembly assembly, bool inherit = false)
+                where T : Attribute
+            {
+                if (assembly == null)
+                    throw new ArgumentNullException("assembly is invalid !");
+                var types = assembly.GetTypes();
+                List<MethodInfo> methodSet = new List<MethodInfo>();
+                foreach (var t in types)
+                {
+                    var methods = t.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).
+                                            Where(m => m.GetCustomAttributes<T>(inherit).Count() > 0).ToArray();
+                    methodSet.AddRange(methods);
+                }
+                return methodSet.ToArray();
             }
             /// <summary>
             /// 执行方法；
