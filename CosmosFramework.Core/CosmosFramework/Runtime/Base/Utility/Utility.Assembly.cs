@@ -550,7 +550,7 @@ where K : class
                     throw new ArgumentNullException("Type is invalid !");
                 if (attributeType == null)
                     throw new ArgumentNullException("AttributeType is invalid !");
-                if (typeof(Attribute).IsAssignableFrom(attributeType))
+                if (!typeof(Attribute).IsAssignableFrom(attributeType))
                     throw new NotImplementedException($"{ attributeType } is not inherit from Attribute!");
                 return type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).
                     Where(m => m.GetCustomAttributes(attributeType, inherit).Length > 0).ToArray();
