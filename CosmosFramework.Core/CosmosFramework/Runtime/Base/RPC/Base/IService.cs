@@ -4,7 +4,5 @@ using System.Text;
 
 namespace Cosmos.RPC
 {
-    public interface IService<TSelf>
-    {
-    }
+    public interface IService<TSelf>{}
 }

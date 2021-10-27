@@ -10,7 +10,6 @@ namespace Cosmos.RPC
     {
         public Type ParameterType;
         public byte[] Value;
-
         public ParamData(Type parameterType, byte[] value)
         {
             ParameterType = parameterType;

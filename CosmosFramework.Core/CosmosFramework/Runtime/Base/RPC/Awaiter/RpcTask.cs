@@ -15,6 +15,11 @@ namespace Cosmos.RPC
         bool isCompleted;
         RPCData reqRpcData;
         RPCData rspRpcData;
+
+        int rspPackageFullLength;
+        int curretPackageLength;
+        byte[] rcvSeg= new byte[0];
+
         public RpcTask(T rawData)
         {
             this.rawData = rawData;
@@ -53,6 +58,21 @@ namespace Cosmos.RPC
             }
             IsCompleted = true;
         }
+        public void RspRpcSegment(int rspFullLength, byte[] segment)
+        {
+            rspPackageFullLength = rspFullLength;
+            curretPackageLength += segment.Length;
+            var localSegs = rcvSeg;
+            rcvSeg = new byte[curretPackageLength];
+            var localLength = localSegs.Length;
+            Array.Copy(localSegs, 0, rcvSeg, 0, localLength);
+            Array.Copy(segment, 0, rcvSeg, localLength, segment.Length);
+            if (rspPackageFullLength == curretPackageLength)
+            {
+                var rpcData = RPCUtility.Serialization.Deserialize<RPCData>(rcvSeg);
+                RspRpcData(rpcData);
+            }
+        }
         public T GetResult() { return rawData; }
         public RpcTask<T> GetAwaiter()
         {
@@ -62,13 +82,5 @@ namespace Cosmos.RPC
         {
             this.continuation = continuation;
         }
-        //public static explicit operator T(RpcTask<T> rpcTask)
-        //{
-        //    return rpcTask.rawData;
-        //}
-        //public static implicit operator RpcTask<T>(T t)
-        //{
-        //    return new RpcTask<T>(t);
-        //}
     }
 }

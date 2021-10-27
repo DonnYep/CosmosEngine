@@ -70,8 +70,22 @@ namespace Cosmos.RPC
             Array.Copy(arrSeg.Array, arrSeg.Offset, rcvData, 0, rcvLen);
             try
             {
-                var rpcData = RPCUtility.Serialization.Deserialize<RPCData>(rcvData);
-                methodsProxy.Invoke(rpcData);
+                var type = (RPCDataPackageType)rcvData[0];
+                var data = new byte[rcvLen - 1];
+                Array.Copy(rcvData, 1, data, 0, rcvLen - 1);
+                switch (type)
+                {
+                    case RPCDataPackageType.Fullpackage:
+                        {
+                            methodsProxy.InvokeRsp(data);
+                        }
+                        break;
+                    case RPCDataPackageType.Subpackage:
+                        {
+                            methodsProxy.InvokeRspSegment(data);
+                        }
+                        break;
+                }
             }
             catch (Exception e)
             {

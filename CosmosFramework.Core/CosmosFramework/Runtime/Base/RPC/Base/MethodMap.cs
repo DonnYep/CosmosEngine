@@ -14,9 +14,9 @@ namespace Cosmos.RPC
     public class MethodMap
     {
         Dictionary<MethodKey, MethodInfo> methodDict;
-        Action<int, byte[]> sendRspMessage;
+        Action<int, RPCData> sendRspMessage;
         object instance;
-        public MethodMap(Action<int, byte[]> sendMessage)
+        public MethodMap(Action<int, RPCData> sendMessage)
         {
             sendRspMessage = sendMessage;
             methodDict = new Dictionary<MethodKey, MethodInfo>();
@@ -66,8 +66,9 @@ namespace Cosmos.RPC
                         var rstBin = RPCUtility.Serialization.SerializeBytes(resultData);
 
                         rspRpcData.ReturnData = new ParamData(paramTypes[0], rstBin);
-                        var bin = RPCUtility.Serialization.SerializeBytes(rspRpcData);
-                        sendRspMessage.Invoke(conv, bin);
+                        //var bin = RPCUtility.Serialization.SerializeBytes(rspRpcData);
+                        //sendRspMessage.Invoke(conv, bin);
+                        sendRspMessage.Invoke(conv, rspRpcData);
                     }
                 }
                 else
@@ -79,8 +80,9 @@ namespace Cosmos.RPC
                         var rstBin = RPCUtility.Serialization.SerializeBytes(resultData);
 
                         rspRpcData.ReturnData = new ParamData(method.ReturnType, rstBin);
-                        var bin = RPCUtility.Serialization.SerializeBytes(rspRpcData);
-                        sendRspMessage.Invoke(conv, bin);
+                        //    var bin = RPCUtility.Serialization.SerializeBytes(rspRpcData);
+                        //sendRspMessage.Invoke(conv, bin);
+                        sendRspMessage.Invoke(conv, rspRpcData);
                     }
                 }
             }
@@ -91,7 +93,6 @@ namespace Cosmos.RPC
             instance = null;
             methodDict.Clear();
         }
-
         async Task<object> AsyncInvokeMethod(MethodInfo method, object[] paramDatas)
         {
             Utility.Debug.LogInfo("AsyncInvokeMethod<->" + method.Name);

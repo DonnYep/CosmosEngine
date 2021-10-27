@@ -10,6 +10,7 @@ namespace Cosmos.RPC
     {
         RpcServerMethodsProxy methodsProxy;
         KcpServerService kcpServerService;
+        RpcSubpackageProcesser rpcSubpackageProcesser;
         Action<int> onConnected;
         Action<int> onDisconnected;
         Action onAbort;
@@ -32,7 +33,8 @@ namespace Cosmos.RPC
         {
             kcpServerService = new KcpServerService();
             kcpServerService.Port = port;
-            methodsProxy = new RpcServerMethodsProxy(SendMessage);
+            methodsProxy = new RpcServerMethodsProxy(SendRpcData);
+            rpcSubpackageProcesser = new RpcSubpackageProcesser(SendMessage);
         }
         public void Start()
         {
@@ -44,11 +46,6 @@ namespace Cosmos.RPC
             kcpServerService.OnServerConnected += OnConnectedHandler;
             kcpServerService.ServiceConnect();
             methodsProxy.RegisterAppDomainTypes();
-        }
-        public void SendMessage( int conv, byte[] data)
-        {
-            var segment = new ArraySegment<byte>(data);
-            kcpServerService.ServiceSend(KcpChannel.Reliable, segment, conv);
         }
         public void Abort()
         {
@@ -71,6 +68,33 @@ namespace Cosmos.RPC
         public void TickRefresh()
         {
             kcpServerService?.ServiceTick();
+            rpcSubpackageProcesser.TickRefresh();
+        }
+        /// <summary>
+        /// 发送byte stream
+        /// </summary>
+        void SendMessage(int conv, byte[] data)
+        {
+            var segment = new ArraySegment<byte>(data);
+            kcpServerService.ServiceSend(KcpChannel.Reliable, segment, conv);
+        }
+        /// <summary>
+        /// 发送rpcdata;
+        /// </summary>
+        void SendRpcData(int conv, RPCData rpcData)
+        {
+            var data = RPCUtility.Serialization.SerializeBytes(rpcData);
+            if (data.Length <= RPCConstants.MaxRpcPackSize)
+            {
+                var fullpackageData = new byte[data.Length + 1];
+                fullpackageData[0] = (byte)RPCDataPackageType.Fullpackage;
+                Array.Copy(data, 0, fullpackageData, 1, data.Length);
+                SendMessage(conv, fullpackageData);
+            }
+            else
+            {
+                rpcSubpackageProcesser.AddFullpackage(conv, rpcData.RpcDataId, data);
+            }
         }
         void OnDisconnectedHandler(int conv)
         {
@@ -88,7 +112,7 @@ namespace Cosmos.RPC
             try
             {
                 var rpcData = RPCUtility.Serialization.Deserialize<RPCData>(rcvData);
-                methodsProxy.Invoke(conv, rpcData);
+                methodsProxy.InvokeReq(conv, rpcData);
             }
             catch (Exception e)
             {

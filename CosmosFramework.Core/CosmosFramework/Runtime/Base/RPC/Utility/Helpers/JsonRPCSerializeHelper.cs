@@ -4,7 +4,7 @@ using System.Text;
 using Cosmos;
 namespace Cosmos.RPC
 {
-    public class DefaultRPCSerializeHelper : RPCUtility.Serialization.IRPCSerializeHelper
+    public class JsonRPCSerializeHelper : RPCUtility.Serialization.IRPCSerializeHelper
     {
         public T Deserialize<T>(byte[] bytes)
         {

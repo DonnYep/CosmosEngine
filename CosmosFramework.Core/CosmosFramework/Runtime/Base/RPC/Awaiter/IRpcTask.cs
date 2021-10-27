@@ -4,14 +4,14 @@ using System.Text;
 
 namespace Cosmos.RPC
 {
-    public interface IRpcTask
+    internal interface IRpcTask
     {
         long TaskId { get;  }
         bool IsCompleted { get; }
         /// <summary>
         /// Response rpc data;
         /// </summary>
-        /// <param name="rpcData"></param>
         void RspRpcData(RPCData rpcData);
+        void RspRpcSegment(int rspFullLength, byte[] segment);
     }
 }

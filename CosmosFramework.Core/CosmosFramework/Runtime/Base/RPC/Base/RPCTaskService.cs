@@ -5,7 +5,7 @@ using System.Text;
 using Cosmos;
 namespace Cosmos.RPC
 {
-    public class RPCTaskService:ConcurrentSingleton<RPCTaskService>
+    internal class RPCTaskService:ConcurrentSingleton<RPCTaskService>
     {
         ConcurrentDictionary<long, IRpcTask> rpcTaskDict;
         ConcurrentQueue<long> removeIdQueue;

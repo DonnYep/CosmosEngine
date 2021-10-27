@@ -6,12 +6,12 @@ using System.Reflection;
 
 namespace Cosmos.RPC
 {
-    public class RpcServerMethodsProxy
+    internal class RpcServerMethodsProxy
     {
         ConcurrentDictionary<Type, MethodMap> methodDict;
         Dictionary<string, Type> stringTypeDict;
-        Action<int, byte[]> sendRspMessage;
-        public RpcServerMethodsProxy(Action<int, byte[]> sendMessage)
+        Action<int, RPCData> sendRspMessage;
+        public RpcServerMethodsProxy(Action<int, RPCData> sendMessage)
         {
             sendRspMessage = sendMessage;
             methodDict = new ConcurrentDictionary<Type, MethodMap>();
@@ -72,13 +72,13 @@ namespace Cosmos.RPC
                 stringTypeDict.Remove(type.FullName);
             }
         }
-        public bool Invoke(int conv,RPCData reqRpcData)
+        public bool InvokeReq(int conv, RPCData reqRpcData)
         {
             var result = false;
             if (stringTypeDict.TryGetValue(reqRpcData.TypeFullName, out var type))
             {
                 result = true;
-                methodDict[type].InvokeMethod(conv,reqRpcData);
+                methodDict[type].InvokeMethod(conv, reqRpcData);
             }
             return result;
         }
