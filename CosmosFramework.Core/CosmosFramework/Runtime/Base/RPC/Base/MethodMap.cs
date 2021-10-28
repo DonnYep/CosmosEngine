@@ -57,17 +57,15 @@ namespace Cosmos.RPC
                 }
                 if (typeof(Task).IsAssignableFrom(method.ReturnType))
                 {
-                    //Task只支持但参数泛型；
+                    //Task只支持带参数泛型；
                     var paramTypes = method.ReturnParameter.ParameterType.GetTypeInfo().GenericTypeArguments;
                     var resultData = AsyncInvokeMethod(method, paramDatas).Result;
                     if (resultData != null)
                     {
                         var rspRpcData = rpcData.Clone();
-                        var rstBin = RPCUtility.Serialization.SerializeBytes(resultData);
-
-                        rspRpcData.ReturnData = new ParamData(paramTypes[0], rstBin);
-                        //var bin = RPCUtility.Serialization.SerializeBytes(rspRpcData);
-                        //sendRspMessage.Invoke(conv, bin);
+                        var retType = paramTypes[0];
+                        var rstBin = RPCUtility.Serialization.Serialize(resultData, retType);
+                        rspRpcData.ReturnData = new ParamData(retType, rstBin);
                         sendRspMessage.Invoke(conv, rspRpcData);
                     }
                 }
@@ -77,11 +75,8 @@ namespace Cosmos.RPC
                     if (resultData != null)
                     {
                         var rspRpcData = rpcData.Clone();
-                        var rstBin = RPCUtility.Serialization.SerializeBytes(resultData);
-
+                        var rstBin = RPCUtility.Serialization.Serialize(resultData, method.ReturnType);
                         rspRpcData.ReturnData = new ParamData(method.ReturnType, rstBin);
-                        //    var bin = RPCUtility.Serialization.SerializeBytes(rspRpcData);
-                        //sendRspMessage.Invoke(conv, bin);
                         sendRspMessage.Invoke(conv, rspRpcData);
                     }
                 }
@@ -93,6 +88,7 @@ namespace Cosmos.RPC
             instance = null;
             methodDict.Clear();
         }
+
         async Task<object> AsyncInvokeMethod(MethodInfo method, object[] paramDatas)
         {
             Utility.Debug.LogInfo("AsyncInvokeMethod<->" + method.Name);

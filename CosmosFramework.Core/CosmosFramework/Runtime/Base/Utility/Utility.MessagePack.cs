@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 namespace Cosmos
 {
     public static partial class Utility
@@ -12,8 +10,15 @@ namespace Cosmos
                 /// <summary>
                 /// 序列化对象到二进制；
                 /// </summary>
-                /// <typeparam name="T">mp标记的对象类型</typeparam>
                 /// <param name="obj">mp对象</param>
+                /// <param name="type">mp标记的对象类型</param>
+                /// <returns></returns>
+                byte[] Serialize(object obj, Type type);
+                /// <summary>
+                /// 序列化对象到二进制；
+                /// </summary>
+                /// <param name="obj">mp对象</param>
+                /// <typeparam name="T">mp标记的对象类型</typeparam>
                 /// <returns>序列化后的对象</returns>
                 byte[] Serialize<T>(T obj);
                 /// <summary>
@@ -92,6 +97,21 @@ namespace Cosmos
                 try
                 {
                     return messagePackHelper.Serialize(obj);
+                }
+                catch (Exception exception)
+                {
+                    throw exception;
+                }
+            }
+            public static byte[] Serialize(object obj, Type type)
+            {
+                if (messagePackHelper == null)
+                {
+                    throw new ArgumentNullException("MessagePackHelper is invalid");
+                }
+                try
+                {
+                    return messagePackHelper.Serialize(obj, type);
                 }
                 catch (Exception exception)
                 {

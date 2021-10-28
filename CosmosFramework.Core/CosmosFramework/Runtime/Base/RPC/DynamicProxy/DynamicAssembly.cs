@@ -24,7 +24,6 @@ namespace Cosmos.RPC
                 return moduleBuilder.DefineType(name, attr);
             }
         }
-
         public TypeBuilder DefineType(string name, TypeAttributes attr, Type parent)
         {
             lock (locker)
@@ -32,7 +31,6 @@ namespace Cosmos.RPC
                 return moduleBuilder.DefineType(name, attr, parent);
             }
         }
-
         public TypeBuilder DefineType(string name, TypeAttributes attr, Type parent, Type[] interfaces)
         {
             lock (locker)

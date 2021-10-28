@@ -22,9 +22,19 @@ namespace CosmosEngine
         /// <summary>
         /// 序列化对象到二进制；
         /// </summary>
+        /// <param name="obj">mp对象</param>
+        /// <param name="type">mp标记的对象类型</param>
+        /// <returns>序列化后的数据</returns>
+        public byte[] Serialize(object obj, Type type)
+        {
+            return MessagePackSerializer.Serialize(type, obj);
+        }
+        /// <summary>
+        /// 序列化对象到二进制；
+        /// </summary>
         /// <typeparam name="T">mp标记的对象类型</typeparam>
         /// <param name="obj">mp对象</param>
-        /// <returns>序列化后的对象</returns>
+        /// <returns>序列化后的数据</returns>
         public byte[] Serialize<T>(T obj)
         {
             return MessagePackSerializer.Serialize<T>(obj);

@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Text;
-
 namespace Cosmos.RPC
 {
     internal class RpcSubpackageProcesser
     {
-        //TODO需要优化subpackDict Queue池生成；
-
+        static readonly ConcurrentPool<Queue<RPCDataSegment>> segmentQueuePool;
+        static RpcSubpackageProcesser()
+        {
+            segmentQueuePool = new ConcurrentPool<Queue<RPCDataSegment>>
+                (() => { return new Queue<RPCDataSegment>(); });
+        }
         ConcurrentDictionary<int, Queue<RPCDataSegment>> subpackDict;
         HashSet<int> removeSet;
         Action<int, byte[]> sendMessage;
@@ -34,26 +36,34 @@ namespace Cosmos.RPC
         /// <summary>
         ///添加一个超过最大发送值的二进制包； 
         /// </summary>
-        public void AddFullpackage(int conv, long rpcDataId, byte[] srcData)
+        public void AddFullpackage(int conv, RPCData rpcData)
         {
             if (!subpackDict.ContainsKey(conv))
             {
-                subpackDict.TryAdd(conv, new Queue<RPCDataSegment>());
+                var segQue = segmentQueuePool.Spawn();
+                subpackDict.TryAdd(conv, segQue);
             }
             //分包
             var segQueue = subpackDict[conv];
-            var srcDataLength = srcData.Length;
-            var segCount = srcDataLength / RPCConstants.MaxRpcPackSize;
-            for (int i = 0; i <= segCount; i++)
+
+            var srcSegData = rpcData.ReturnData.Value;
+            var srcSegDataLength = rpcData.ReturnData.Value.Length;
+
+            var segCount = srcSegDataLength / RPCConstants.MaxRpcPackSize;
+            var remain = srcSegDataLength % RPCConstants.MaxRpcPackSize;
+
+            for (int i = 0; i < segCount; i++)
             {
-                var remainLength = srcDataLength - i * RPCConstants.MaxRpcPackSize;
-                byte[] dstData;
-                if (remainLength < RPCConstants.MaxRpcPackSize)
-                    dstData = new byte[remainLength];
-                else
-                    dstData = new byte[RPCConstants.MaxRpcPackSize];
-                Array.Copy(srcData, i * dstData.Length, dstData, 0, dstData.Length);
-                var rpcSeg = new RPCDataSegment(rpcDataId, srcData.Length, dstData);
+                byte[] dstData = new byte[RPCConstants.MaxRpcPackSize];
+                Array.Copy(srcSegData, i * dstData.Length, dstData, 0, dstData.Length);
+                var rpcSeg = new RPCDataSegment(rpcData.RpcDataId, srcSegDataLength, dstData);
+                segQueue.Enqueue(rpcSeg);
+            }
+            if (remain > 0)
+            {
+                byte[] dstData = new byte[remain];
+                Array.Copy(srcSegData, segCount * RPCConstants.MaxRpcPackSize, dstData, 0, dstData.Length);
+                var rpcSeg = new RPCDataSegment(rpcData.RpcDataId, srcSegDataLength, dstData);
                 segQueue.Enqueue(rpcSeg);
             }
         }
@@ -63,17 +73,20 @@ namespace Cosmos.RPC
             {
                 var rpcSeg = subpack.Value.Dequeue();
                 var rpcSegBytes = RPCDataSegment.Serialize(rpcSeg);
-                var rpcSubpackageBytes = new byte[rpcSegBytes.Length + 1];
-                rpcSubpackageBytes[0] = (byte)RPCDataPackageType.Subpackage;
-                Array.Copy(rpcSegBytes, 0, rpcSubpackageBytes, 1, rpcSegBytes.Length);
 
-                sendMessage(subpack.Key, rpcSubpackageBytes);
+                var sndRpcSegBytes = new byte[rpcSegBytes.Length + 1];
+
+                sndRpcSegBytes[0] = (byte)RPCDataPackageType.Subpackage;
+
+                Array.Copy(rpcSegBytes, 0, sndRpcSegBytes, 1, rpcSegBytes.Length);
+                sendMessage(subpack.Key, sndRpcSegBytes);
                 if (subpack.Value.Count == 0)
                     removeSet.Add(subpack.Key);
             }
             foreach (var id in removeSet)
             {
-                subpackDict.Remove(id);
+                subpackDict.Remove(id,out var queue);
+                segmentQueuePool.Despawn(queue);
             }
             removeSet.Clear();
         }

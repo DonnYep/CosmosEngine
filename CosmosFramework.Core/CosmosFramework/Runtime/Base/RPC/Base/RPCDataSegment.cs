@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Cosmos.RPC
 {
-     public struct RPCDataSegment
+    internal struct RPCDataSegment
     {
         public long RspDataId;
         public int RspDataLength;
@@ -19,22 +16,22 @@ namespace Cosmos.RPC
         {
             var rspDataIdBytes = BitConverter.GetBytes(segment.RspDataId);
             var rspDataLengthBytes = BitConverter.GetBytes(segment.RspDataLength);
-            var seg= segment.Segment;
-            var segBytes = new byte[rspDataIdBytes.Length + rspDataLengthBytes.Length + seg.Length];
+            var seg = segment.Segment;
+            var segBytes = new byte[seg.Length + 12];
             Array.Copy(rspDataIdBytes, 0, segBytes, 0, 8);
             Array.Copy(rspDataLengthBytes, 0, segBytes, 8, 4);
             Array.Copy(seg, 0, segBytes, 12, seg.Length);
             return segBytes;
         }
-        public static RPCDataSegment Deserialize(byte[] data)
+        public static RPCDataSegment Deserialize(byte[] srcData)
         {
             var rspDataIdBytes = new byte[8];
             var rspDataLengthBytes = new byte[4];
-            var seg = new byte[data.Length-12];
+            var seg = new byte[srcData.Length - 12];
 
-            Array.Copy(data, 0, rspDataIdBytes, 0, 8);
-            Array.Copy(data, 8, rspDataLengthBytes, 0, 4);
-            Array.Copy(data, 12, seg, 0, seg.Length);
+            Array.Copy(srcData, 0, rspDataIdBytes, 0, 8);
+            Array.Copy(srcData, 8, rspDataLengthBytes, 0, 4);
+            Array.Copy(srcData, 12, seg, 0, seg.Length);
 
             var rspDataId = BitConverter.ToInt64(rspDataIdBytes);
             var rspDataLength = BitConverter.ToInt32(rspDataLengthBytes);

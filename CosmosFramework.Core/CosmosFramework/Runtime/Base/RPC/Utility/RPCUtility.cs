@@ -6,7 +6,5 @@ using System.Text;
 using System.Threading.Tasks;
 namespace Cosmos.RPC
 {
-    public partial class RPCUtility
-    {
-    }
+    public partial class RPCUtility{}
 }

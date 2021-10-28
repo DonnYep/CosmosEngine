@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Cosmos.RPC
 {
     public class MessagePackRPCSerializeHelper : RPCUtility.Serialization.IRPCSerializeHelper
@@ -17,6 +14,14 @@ namespace Cosmos.RPC
         public byte[] Serialize<T>(T obj)
         {
             return Utility.MessagePack.Serialize(obj);
+        }
+        public byte[] Serialize(object obj, Type type)
+        {
+            return Utility.MessagePack.Serialize(obj, type);
+        }
+        public byte[] SerializeBytes(object obj, Type type)
+        {
+            return Utility.MessagePack.Serialize(obj, type);
         }
         public byte[] SerializeToBytes(object obj)
         {

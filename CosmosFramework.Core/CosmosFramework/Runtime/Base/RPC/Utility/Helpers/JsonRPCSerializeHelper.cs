@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Cosmos;
 namespace Cosmos.RPC
 {
     public class JsonRPCSerializeHelper : RPCUtility.Serialization.IRPCSerializeHelper
@@ -15,6 +12,10 @@ namespace Cosmos.RPC
             return Utility.Json.BytesToObject(bytes,type);
         }
         public byte[] Serialize<T>(T obj)
+        {
+            return Utility.Json.ToJsonBytes(obj);
+        }
+        public byte[] Serialize(object obj, Type type)
         {
             return Utility.Json.ToJsonBytes(obj);
         }

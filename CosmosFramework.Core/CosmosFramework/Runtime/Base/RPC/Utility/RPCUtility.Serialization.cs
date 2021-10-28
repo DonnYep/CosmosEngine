@@ -12,7 +12,7 @@ namespace Cosmos.RPC
             static long RpcDataIndex = 0;
             public interface IRPCSerializeHelper
             {
-                byte[] SerializeToBytes(object obj);
+                byte[] Serialize(object obj, Type type);
                 byte[] Serialize<T>(T obj);
                 T Deserialize<T>(byte[] bytes);
                 object Deserialize(byte[] bytes, Type type);
@@ -22,36 +22,17 @@ namespace Cosmos.RPC
             {
                 rpcSerializeHelper = helper;
             }
-            public static byte[] SerializeBytes<T>(T obj)
+            public static byte[] Serialize<T>(T obj)
             {
+                if (rpcSerializeHelper == null)
+                    throw new ArgumentNullException("IRPCSerializeHelper is invalid !");
                 return rpcSerializeHelper.Serialize(obj);
             }
-            public static byte[] SerializeRpcDataToBytes(Type type, string methodName, Type retrunType, params object[] parameters)
+            public static byte[] Serialize(object obj, Type type)
             {
                 if (rpcSerializeHelper == null)
                     throw new ArgumentNullException("IRPCSerializeHelper is invalid !");
-                var length = parameters.Length;
-                var argInfoArrary = new ParamData[length];
-                for (int i = 0; i < length; i++)
-                {
-                    var param = parameters[i];
-                    argInfoArrary[i] = new ParamData(param.GetType(), rpcSerializeHelper.SerializeToBytes(parameters[i]));
-                }
-                RPCData reqRpcData = new RPCData(RpcDataIndex++, type.FullName, methodName, new ParamData(retrunType, null), argInfoArrary);
-                return rpcSerializeHelper.Serialize(reqRpcData);
-            }
-            public static RPCData SerializeToRpcData(Type type, string methodName, Type retrunType, params object[] parameters)
-            {
-                if (rpcSerializeHelper == null)
-                    throw new ArgumentNullException("IRPCSerializeHelper is invalid !");
-                var length = parameters.Length;
-                var argInfoArrary = new ParamData[length];
-                for (int i = 0; i < length; i++)
-                {
-                    var param = parameters[i];
-                    argInfoArrary[i] = new ParamData(param.GetType(), rpcSerializeHelper.SerializeToBytes(parameters[i]));
-                }
-                return new RPCData(RpcDataIndex++, type.FullName, methodName, new ParamData(retrunType, null), argInfoArrary);
+                return rpcSerializeHelper.Serialize(obj, type);
             }
             public static T Deserialize<T>(byte[] bytes)
             {
@@ -64,6 +45,35 @@ namespace Cosmos.RPC
                 if (rpcSerializeHelper == null)
                     throw new ArgumentNullException("IRPCSerializeHelper is invalid !");
                 return rpcSerializeHelper.Deserialize(bytes, type);
+            }
+            public static RPCData EncodeRpcData(string typeFullName, string methodName, Type retrunType, params object[] parameters)
+            {
+                if (rpcSerializeHelper == null)
+                    throw new ArgumentNullException("IRPCSerializeHelper is invalid !");
+                var length = parameters.Length;
+                var argInfoArrary = new ParamData[length];
+                for (int i = 0; i < length; i++)
+                {
+                    var param = parameters[i];
+                    var pType = param.GetType();
+                    argInfoArrary[i] = new ParamData(pType, rpcSerializeHelper.Serialize(parameters[i], pType));
+                }
+                return new RPCData(RpcDataIndex++, typeFullName, methodName, new ParamData(retrunType, null), argInfoArrary);
+            }
+            public static byte[] EncodeRpcDataToBytes(string typeFullName, string methodName, Type retrunType, params object[] parameters)
+            {
+                if (rpcSerializeHelper == null)
+                    throw new ArgumentNullException("IRPCSerializeHelper is invalid !");
+                var length = parameters.Length;
+                var argInfoArrary = new ParamData[length];
+                for (int i = 0; i < length; i++)
+                {
+                    var param = parameters[i];
+                    var pType = param.GetType();
+                    argInfoArrary[i] = new ParamData(pType, rpcSerializeHelper.Serialize(parameters[i], pType));
+                }
+                RPCData reqRpcData = new RPCData(RpcDataIndex++, typeFullName, methodName, new ParamData(retrunType, null), argInfoArrary);
+                return rpcSerializeHelper.Serialize(reqRpcData);
             }
         }
     }

@@ -83,17 +83,17 @@ namespace Cosmos.RPC
         /// </summary>
         void SendRpcData(int conv, RPCData rpcData)
         {
-            var data = RPCUtility.Serialization.SerializeBytes(rpcData);
-            if (data.Length <= RPCConstants.MaxRpcPackSize)
+            if (rpcData.ReturnData.Value.Length <= RPCConstants.MaxRpcPackSize)
             {
-                var fullpackageData = new byte[data.Length + 1];
-                fullpackageData[0] = (byte)RPCDataPackageType.Fullpackage;
-                Array.Copy(data, 0, fullpackageData, 1, data.Length);
-                SendMessage(conv, fullpackageData);
+                var srcData = RPCUtility.Serialization.Serialize(rpcData);
+                var sndData = new byte[srcData.Length + 1];
+                sndData[0] = (byte)RPCDataPackageType.Fullpackage;
+                Array.Copy(srcData, 0, sndData, 1, srcData.Length);
+                SendMessage(conv, sndData);
             }
             else
             {
-                rpcSubpackageProcesser.AddFullpackage(conv, rpcData.RpcDataId, data);
+                rpcSubpackageProcesser.AddFullpackage(conv, rpcData);
             }
         }
         void OnDisconnectedHandler(int conv)
