@@ -72,13 +72,13 @@ namespace Cosmos.RPC
                 stringTypeDict.Remove(type.FullName);
             }
         }
-        public bool InvokeReq(int conv, RPCData reqRpcData)
+        public bool InvokeReq(int conv,RPCData reqRpcData)
         {
             var result = false;
             if (stringTypeDict.TryGetValue(reqRpcData.TypeFullName, out var type))
             {
                 result = true;
-                methodDict[type].InvokeMethod(conv, reqRpcData);
+                methodDict[type].InvokeMethod(conv,reqRpcData);
             }
             return result;
         }

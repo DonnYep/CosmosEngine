@@ -1,5 +1,9 @@
 ﻿using kcp;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Text;
 namespace Cosmos.RPC
 {
     public class RPCClient
@@ -36,6 +40,8 @@ namespace Cosmos.RPC
         }
         public void SendMessage(byte[] data)
         {
+            if (!IsConnect)
+                return;
             var arraySegment = new ArraySegment<byte>(data);
             kcpClientService.ServiceSend(KcpChannel.Reliable, arraySegment);
         }
@@ -46,6 +52,10 @@ namespace Cosmos.RPC
         public void TickRefresh()
         {
             kcpClientService?.ServiceTick();
+        }
+        public static T Create<T>(RPCClient client) where T : IService<T>
+        {
+            return DynamicProxyFactory.CreateDynamicProxy<T>(client);
         }
         void OnDisconnectHandler()
         {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Cosmos.RPC
 {
-    public enum RPCDataPackageType:byte
+    internal enum RPCDataPackageType:byte
     {
         /// <summary>
         /// 整包；

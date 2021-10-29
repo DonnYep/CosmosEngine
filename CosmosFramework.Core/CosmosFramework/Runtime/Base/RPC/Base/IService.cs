@@ -4,5 +4,10 @@ using System.Text;
 
 namespace Cosmos.RPC
 {
-    public interface IService<TSelf>{}
+    public interface IService<TSelf>
+    {
+        /*
+         * 所有派生的接口返回值都必须为Task
+         */
+    }
 }

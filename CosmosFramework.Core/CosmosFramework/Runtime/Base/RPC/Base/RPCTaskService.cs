@@ -5,7 +5,7 @@ using System.Text;
 using Cosmos;
 namespace Cosmos.RPC
 {
-    internal class RPCTaskService:ConcurrentSingleton<RPCTaskService>
+    internal class RPCTaskService : ConcurrentSingleton<RPCTaskService>
     {
         ConcurrentDictionary<long, IRpcTask> rpcTaskDict;
         ConcurrentQueue<long> removeIdQueue;
@@ -31,7 +31,7 @@ namespace Cosmos.RPC
         {
             rpcTaskDict.Clear();
             removeIdQueue.Clear();
-            CosmosEntry.TickRefreshHandler -=TickRefresh;
+            CosmosEntry.TickRefreshHandler -= TickRefresh;
             base.Dispose();
         }
         public void TickRefresh()

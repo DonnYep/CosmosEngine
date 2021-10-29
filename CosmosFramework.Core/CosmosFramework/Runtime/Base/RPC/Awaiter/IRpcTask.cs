@@ -6,7 +6,7 @@ namespace Cosmos.RPC
 {
     internal interface IRpcTask
     {
-        long TaskId { get;  }
+        long TaskId { get; }
         bool IsCompleted { get; }
         /// <summary>
         /// Response rpc data;

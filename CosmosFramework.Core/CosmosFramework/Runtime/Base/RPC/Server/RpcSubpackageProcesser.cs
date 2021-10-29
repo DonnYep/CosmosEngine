@@ -85,7 +85,7 @@ namespace Cosmos.RPC
             }
             foreach (var id in removeSet)
             {
-                subpackDict.Remove(id,out var queue);
+                subpackDict.Remove(id, out var queue);
                 segmentQueuePool.Despawn(queue);
             }
             removeSet.Clear();

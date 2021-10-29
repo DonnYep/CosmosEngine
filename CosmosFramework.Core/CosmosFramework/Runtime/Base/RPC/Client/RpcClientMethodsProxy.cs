@@ -20,7 +20,7 @@ namespace Cosmos.RPC
             var seg = RPCDataSegment.Deserialize(rpcDataSeg);
             if (RPCTaskService.Instance.PeekTask(seg.RspDataId, out var rpcTask))
             {
-                rpcTask.RspRpcSegment(seg.RspDataLength,seg.Segment);
+                rpcTask.RspRpcSegment(seg.RspDataLength, seg.Segment);
             }
         }
     }

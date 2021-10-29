@@ -11,7 +11,7 @@ namespace Cosmos.RPC
     /// 实例方法调用者；
     /// 传入一个实例，远程调用这个对象的方法；
     /// </summary>
-    public class MethodMap
+    internal class MethodMap
     {
         Dictionary<MethodKey, MethodInfo> methodDict;
         Action<int, RPCData> sendRspMessage;
@@ -64,8 +64,13 @@ namespace Cosmos.RPC
                     {
                         var rspRpcData = rpcData.Clone();
                         var retType = paramTypes[0];
-                        var rstBin = RPCUtility.Serialization.Serialize(resultData, retType);
+                        var rstBin = RPCUtility.Serialization.Serialize(resultData,retType );
                         rspRpcData.ReturnData = new ParamData(retType, rstBin);
+                        sendRspMessage.Invoke(conv, rspRpcData);
+                    }
+                    else
+                    {
+                        var rspRpcData = rpcData.Clone();
                         sendRspMessage.Invoke(conv, rspRpcData);
                     }
                 }

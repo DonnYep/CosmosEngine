@@ -46,10 +46,12 @@ namespace Cosmos.RPC
                     throw new ArgumentNullException("IRPCSerializeHelper is invalid !");
                 return rpcSerializeHelper.Deserialize(bytes, type);
             }
-            public static RPCData EncodeRpcData(string typeFullName, string methodName, Type retrunType, params object[] parameters)
+            internal static RPCData EncodeRpcData(string typeFullName, string methodName, Type retrunType, params object[] parameters)
             {
                 if (rpcSerializeHelper == null)
                     throw new ArgumentNullException("IRPCSerializeHelper is invalid !");
+                if (parameters == null)
+                    return new RPCData(RpcDataIndex++, typeFullName, methodName, new ParamData(retrunType, null), new ParamData[0]);
                 var length = parameters.Length;
                 var argInfoArrary = new ParamData[length];
                 for (int i = 0; i < length; i++)
@@ -60,10 +62,16 @@ namespace Cosmos.RPC
                 }
                 return new RPCData(RpcDataIndex++, typeFullName, methodName, new ParamData(retrunType, null), argInfoArrary);
             }
-            public static byte[] EncodeRpcDataToBytes(string typeFullName, string methodName, Type retrunType, params object[] parameters)
+            internal static byte[] EncodeRpcDataToBytes(string typeFullName, string methodName, Type retrunType, params object[] parameters)
             {
                 if (rpcSerializeHelper == null)
                     throw new ArgumentNullException("IRPCSerializeHelper is invalid !");
+                RPCData reqRpcData;
+                if (parameters == null)
+                {
+                    reqRpcData = new RPCData(RpcDataIndex++, typeFullName, methodName, new ParamData(retrunType, null), new ParamData[0]);
+                    return rpcSerializeHelper.Serialize(reqRpcData);
+                }
                 var length = parameters.Length;
                 var argInfoArrary = new ParamData[length];
                 for (int i = 0; i < length; i++)
@@ -72,7 +80,7 @@ namespace Cosmos.RPC
                     var pType = param.GetType();
                     argInfoArrary[i] = new ParamData(pType, rpcSerializeHelper.Serialize(parameters[i], pType));
                 }
-                RPCData reqRpcData = new RPCData(RpcDataIndex++, typeFullName, methodName, new ParamData(retrunType, null), argInfoArrary);
+                reqRpcData = new RPCData(RpcDataIndex++, typeFullName, methodName, new ParamData(retrunType, null), argInfoArrary);
                 return rpcSerializeHelper.Serialize(reqRpcData);
             }
         }

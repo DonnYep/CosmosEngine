@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Cosmos.RPC
 {
-    public struct MethodKey : IEquatable<MethodKey>
+    internal struct MethodKey : IEquatable<MethodKey>
     {
         readonly string methodFullName ;
         readonly int methodParameterCount;

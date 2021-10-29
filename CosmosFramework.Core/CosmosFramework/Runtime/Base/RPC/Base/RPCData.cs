@@ -7,7 +7,7 @@ namespace Cosmos.RPC
     /// <summary>
     /// 调用时的数据；
     /// </summary>
-    public struct RPCData
+    internal struct RPCData
     {
         public long RpcDataId;
         public string TypeFullName;

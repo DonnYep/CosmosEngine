@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Cosmos.RPC
 {
-    internal class RPCConstants
+    public class RPCConstants
     {
         /// <summary>
         /// 一个RPC包最大的容量，约80KB；
