@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-namespace Cosmos.RPC
+using Cosmos.RPC.Core;
+
+namespace Cosmos.RPC.Server
 {
     internal class RpcSubpackageProcesser
     {
@@ -36,7 +38,7 @@ namespace Cosmos.RPC
         /// <summary>
         ///添加一个超过最大发送值的二进制包； 
         /// </summary>
-        public void AddFullpackage(int conv, RPCData rpcData)
+        public void AddFullpackage(int conv, RPCInvokeData rpcData)
         {
             if (!subpackDict.ContainsKey(conv))
             {
@@ -76,7 +78,7 @@ namespace Cosmos.RPC
 
                 var sndRpcSegBytes = new byte[rpcSegBytes.Length + 1];
 
-                sndRpcSegBytes[0] = (byte)RPCDataPackageType.Subpackage;
+                sndRpcSegBytes[0] = (byte)RPCPackageType.Segment;
 
                 Array.Copy(rpcSegBytes, 0, sndRpcSegBytes, 1, rpcSegBytes.Length);
                 sendMessage(subpack.Key, sndRpcSegBytes);

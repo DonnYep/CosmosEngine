@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Text;
-using Cosmos;
-namespace Cosmos.RPC
+﻿using System.Collections.Concurrent;
+namespace Cosmos.RPC.Core
 {
-    internal class RPCTaskService : ConcurrentSingleton<RPCTaskService>
+    internal class RPCTaskManager : ConcurrentSingleton<RPCTaskManager>
     {
         ConcurrentDictionary<long, IRpcTask> rpcTaskDict;
         ConcurrentQueue<long> removeIdQueue;
-        public RPCTaskService()
+        public RPCTaskManager()
         {
             rpcTaskDict = new ConcurrentDictionary<long, IRpcTask>();
             removeIdQueue = new ConcurrentQueue<long>();

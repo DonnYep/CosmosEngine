@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
-
-namespace Cosmos.RPC
+﻿using Cosmos.RPC.Core;
+namespace Cosmos.RPC.Client
 {
     internal class RpcClientMethodsProxy
     {
         public void InvokeRsp(byte[] fullpackage)
         {
-            var rspRpcData = RPCUtility.Serialization.Deserialize<RPCData>(fullpackage);
-            if (RPCTaskService.Instance.PeekTask(rspRpcData.RpcDataId, out var rpcTask))
+            var rspRpcData = RPCUtility.Serialization.Deserialize<RPCInvokeData>(fullpackage);
+            if (RPCTaskManager.Instance.PeekTask(rspRpcData.RpcDataId, out var rpcTask))
             {
-                rpcTask.RspRpcData(rspRpcData);
+                rpcTask.RspRpcData(rspRpcData.ReturnData.Value,rspRpcData.ReturnData.ParameterType);
             }
         }
         public void InvokeRspSegment(byte[] rpcDataSeg)
         {
             var seg = RPCDataSegment.Deserialize(rpcDataSeg);
-            if (RPCTaskService.Instance.PeekTask(seg.RspDataId, out var rpcTask))
+            if (RPCTaskManager.Instance.PeekTask(seg.RspDataId, out var rpcTask))
             {
                 rpcTask.RspRpcSegment(seg.RspDataLength, seg.Segment);
             }

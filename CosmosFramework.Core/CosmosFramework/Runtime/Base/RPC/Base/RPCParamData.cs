@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-namespace Cosmos.RPC
+namespace Cosmos.RPC.Core
 {
     /// <summary>
     /// 参数数据；
     /// </summary>
-    internal struct ParamData
+    public struct RPCParamData
     {
         public Type ParameterType;
         public byte[] Value;
-
-        public ParamData(Type parameterType, byte[] value)
+        public RPCParamData(Type parameterType, byte[] value)
         {
             ParameterType = parameterType;
             Value = value;

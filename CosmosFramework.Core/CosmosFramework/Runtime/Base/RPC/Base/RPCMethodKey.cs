@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-
-namespace Cosmos.RPC
+namespace Cosmos.RPC.Core
 {
-    internal struct MethodKey : IEquatable<MethodKey>
+    internal struct RPCMethodKey : IEquatable<RPCMethodKey>
     {
         readonly string methodFullName ;
         readonly int methodParameterCount;
@@ -13,7 +9,7 @@ namespace Cosmos.RPC
 
         public int MethodParameterCount { get {return methodParameterCount; } }
         readonly int hashCode;
-        public MethodKey(string methodFullName, int paramCount)
+        public RPCMethodKey(string methodFullName, int paramCount)
         {
             if (string.IsNullOrEmpty(methodFullName))
                 throw new ArgumentException($"{nameof(methodFullName)} is invalid !");
@@ -21,21 +17,21 @@ namespace Cosmos.RPC
             this.methodParameterCount = paramCount;
             hashCode = methodFullName.GetHashCode() ^ paramCount.GetHashCode();
         }
-        public bool Equals(MethodKey other)
+        public bool Equals(RPCMethodKey other)
         {
             return methodFullName== other.methodFullName&& methodParameterCount== other.methodParameterCount;
         }
-        public static bool operator ==(MethodKey a, MethodKey b)
+        public static bool operator ==(RPCMethodKey a, RPCMethodKey b)
         {
             return a.Equals(b);
         }
-        public static bool operator !=(MethodKey a, MethodKey b)
+        public static bool operator !=(RPCMethodKey a, RPCMethodKey b)
         {
             return !(a == b);
         }
         public override bool Equals(object obj)
         {
-            return obj is MethodKey  && Equals((MethodKey)obj);
+            return obj is RPCMethodKey  && Equals((RPCMethodKey)obj);
         }
         public override int GetHashCode()
         {

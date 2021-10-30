@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Text;
 using kcp;
-namespace Cosmos.RPC
+using Cosmos.RPC.Core;
+
+namespace Cosmos.RPC.Server
 {
     public class RPCServer
     {
@@ -81,13 +83,13 @@ namespace Cosmos.RPC
         /// <summary>
         /// 发送rpcdata;
         /// </summary>
-        void SendRpcData(int conv, RPCData rpcData)
+        void SendRpcData(int conv, RPCInvokeData rpcData)
         {
             if (rpcData.ReturnData.Value.Length <= RPCConstants.MaxRpcPackSize)
             {
                 var srcData = RPCUtility.Serialization.Serialize(rpcData);
                 var sndData = new byte[srcData.Length + 1];
-                sndData[0] = (byte)RPCDataPackageType.Fullpackage;
+                sndData[0] = (byte)RPCPackageType.Fullpackage;
                 Array.Copy(srcData, 0, sndData, 1, srcData.Length);
                 SendMessage(conv, sndData);
             }
@@ -111,7 +113,7 @@ namespace Cosmos.RPC
             Array.Copy(arrSeg.Array, 1, rcvData, 0, rcvLen);
             try
             {
-                var rpcData = RPCUtility.Serialization.Deserialize<RPCData>(rcvData);
+                var rpcData = RPCUtility.Serialization.Deserialize<RPCInvokeData>(rcvData);
                 methodsProxy.InvokeReq(conv, rpcData);
             }
             catch (Exception e)

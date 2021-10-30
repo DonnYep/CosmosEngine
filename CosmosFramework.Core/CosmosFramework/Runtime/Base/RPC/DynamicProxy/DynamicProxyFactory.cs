@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 using System.Linq;
-using Cosmos.RPC.Client;
-using Cosmos.RPC;
 using System.Threading.Tasks;
-
-namespace Cosmos.RPC
+namespace Cosmos.RPC.Client
 {
     //================================================
     /*
     *1、泛型约束的类型必须是派生自IService<T>的接口有类型；
     */
     //================================================
-    /// <summary>
-    /// https://blog.csdn.net/xiaouncle/article/details/52776007
-    /// </summary>
     internal class DynamicProxyFactory
     {
         public static T CreateDynamicProxy<T>(RPCClient client)
@@ -55,24 +47,13 @@ where T : IService<T>
             typeBuilder.AddInterfaceImplementation(typeof(T));
             //对象的构造方法 pulic ClassName(RPCClient client){}
             var ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis | CallingConventions.Standard, new Type[] { typeof(RPCClient) });
-
-            //对象定义一个字段；
-            //var rpcClientField = typeBuilder.DefineField("rpcClient", typeof(RPCClient), FieldAttributes.Private);
-
-           
-
-            var createVoidRpcTaskMethod = baseType.GetMethod("CreateVoidRpcTask", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            var awaitVoidRpcTaskMethod = baseType.GetMethod("AwaitVoidRpcTask", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-
-            var protectRpcClient = baseType.GetField("rpcClient", BindingFlags.Instance| BindingFlags.NonPublic| BindingFlags.Public);
-
+            var rpcClient = baseType.GetField("rpcClient", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             var methodLength = interfaceMethods.Length;
             //构造函数
             var constructorBody = ctorBuilder.GetILGenerator();
             constructorBody.Emit(OpCodes.Ldarg_0);
             constructorBody.Emit(OpCodes.Ldarg_1);
-            //constructorBody.Emit(OpCodes.Stfld, rpcClientField);
-            constructorBody.Emit(OpCodes.Stfld, protectRpcClient);
+            constructorBody.Emit(OpCodes.Stfld, rpcClient);
             constructorBody.Emit(OpCodes.Ret);
             //实现接口的方法；
             for (int i = 0; i < methodLength; i++)
@@ -95,7 +76,7 @@ where T : IService<T>
                 {
                     var returnParamType = returnParameterTypes[0];
                     var createResultfulRpcTaskMethod = baseType.GetMethod("CreateResultfulRpcTask", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).MakeGenericMethod(returnParamType);
-                    var awaitResultfulRpcTaskMethod = baseType.GetMethod("AwaitResultfulRpcTask", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).MakeGenericMethod(returnParamType); 
+                    var awaitResultfulRpcTaskMethod = baseType.GetMethod("AwaitResultfulRpcTask", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).MakeGenericMethod(returnParamType);
 
                     var rpcTaskType = typeof(RpcTask<>).MakeGenericType(returnParamType);
                     var taskType = typeof(Task<>).MakeGenericType(returnParamType);
@@ -136,6 +117,8 @@ where T : IService<T>
                 }
                 else//返回值为Task
                 {
+                    var createVoidRpcTaskMethod = baseType.GetMethod("CreateVoidRpcTask", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                    var awaitVoidRpcTaskMethod = baseType.GetMethod("AwaitVoidRpcTask", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
                     //设置方法的泛型；
                     var localRpcTask = methodIL.DeclareLocal(typeof(RpcTask));
                     var localTask = methodIL.DeclareLocal(typeof(Task));
@@ -148,13 +131,13 @@ where T : IService<T>
                     var formalParamCount = formalParamTypes.Length;
 
                     methodIL.Emit(OpCodes.Ldc_I4_S, formalParamCount);
-                    methodIL.Emit(OpCodes.Newarr,typeof(object));
+                    methodIL.Emit(OpCodes.Newarr, typeof(object));
                     //params object[] parameter
                     for (int j = 0; j < formalParamCount; j++)
                     {
                         methodIL.Emit(OpCodes.Dup);
                         methodIL.Emit(OpCodes.Ldc_I4_S, j);
-                        methodIL.Emit(OpCodes.Ldarg_S, j+1);
+                        methodIL.Emit(OpCodes.Ldarg_S, j + 1);
                         //不是引用类型；
                         if (!formalParamTypes[j].IsClass)
                             methodIL.Emit(OpCodes.Box, formalParamTypes[j]);

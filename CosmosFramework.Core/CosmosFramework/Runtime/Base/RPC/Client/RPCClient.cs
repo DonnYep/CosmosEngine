@@ -1,10 +1,8 @@
 ﻿using kcp;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Text;
-namespace Cosmos.RPC
+using Cosmos.RPC.Core;
+
+namespace Cosmos.RPC.Client
 {
     public class RPCClient
     {
@@ -76,17 +74,17 @@ namespace Cosmos.RPC
             Array.Copy(arrSeg.Array, arrSeg.Offset, rcvData, 0, rcvLen);
             try
             {
-                var type = (RPCDataPackageType)rcvData[0];
+                var type = (RPCPackageType)rcvData[0];
                 var data = new byte[rcvLen - 1];
                 Array.Copy(rcvData, 1, data, 0, rcvLen - 1);
                 switch (type)
                 {
-                    case RPCDataPackageType.Fullpackage:
+                    case RPCPackageType.Fullpackage:
                         {
                             methodsProxy.InvokeRsp(data);
                         }
                         break;
-                    case RPCDataPackageType.Subpackage:
+                    case RPCPackageType.Segment:
                         {
                             methodsProxy.InvokeRspSegment(data);
                         }

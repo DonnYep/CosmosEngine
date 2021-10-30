@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Text;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Cosmos.RPC
+namespace Cosmos.RPC.Core
 {
     /// <summary>
     /// 实例方法调用者；
     /// 传入一个实例，远程调用这个对象的方法；
     /// </summary>
-    internal class MethodMap
+    internal class RPCMethodMap
     {
-        Dictionary<MethodKey, MethodInfo> methodDict;
-        Action<int, RPCData> sendRspMessage;
+        Dictionary<RPCMethodKey, MethodInfo> methodDict;
+        Action<int, RPCInvokeData> sendRspMessage;
         object instance;
-        public MethodMap(Action<int, RPCData> sendMessage)
+        public RPCMethodMap(Action<int, RPCInvokeData> sendMessage)
         {
             sendRspMessage = sendMessage;
-            methodDict = new Dictionary<MethodKey, MethodInfo>();
+            methodDict = new Dictionary<RPCMethodKey, MethodInfo>();
         }
         public void SetInstance(object instance)
         {
@@ -28,19 +26,19 @@ namespace Cosmos.RPC
         public void AddMethod(MethodInfo methodInfo)
         {
             var paramArray = methodInfo.GetParameters();
-            var key = new MethodKey(methodInfo.Name, paramArray.Length);
+            var key = new RPCMethodKey(methodInfo.Name, paramArray.Length);
             methodDict.TryAdd(key, methodInfo);
         }
         public void RemoveMethod(MethodInfo methodInfo)
         {
-            var key = new MethodKey(methodInfo.Name, methodInfo.GetParameters().Length);
+            var key = new RPCMethodKey(methodInfo.Name, methodInfo.GetParameters().Length);
             methodDict.Remove(key);
         }
-        public bool InvokeMethod(int conv, RPCData rpcData)
+        public bool InvokeMethod(int conv, RPCInvokeData rpcData)
         {
             bool result = false;
             var paramLength = rpcData.Parameters.Length;
-            var methodKey = new MethodKey(rpcData.MethodName, paramLength);
+            var methodKey = new RPCMethodKey(rpcData.MethodName, paramLength);
             if (methodDict.TryGetValue(methodKey, out var method))
             {
                 result = true;
@@ -65,7 +63,7 @@ namespace Cosmos.RPC
                         var rspRpcData = rpcData.Clone();
                         var retType = paramTypes[0];
                         var rstBin = RPCUtility.Serialization.Serialize(resultData,retType );
-                        rspRpcData.ReturnData = new ParamData(retType, rstBin);
+                        rspRpcData.ReturnData = new RPCParamData(retType, rstBin);
                         sendRspMessage.Invoke(conv, rspRpcData);
                     }
                     else
@@ -81,7 +79,7 @@ namespace Cosmos.RPC
                     {
                         var rspRpcData = rpcData.Clone();
                         var rstBin = RPCUtility.Serialization.Serialize(resultData, method.ReturnType);
-                        rspRpcData.ReturnData = new ParamData(method.ReturnType, rstBin);
+                        rspRpcData.ReturnData = new RPCParamData(method.ReturnType, rstBin);
                         sendRspMessage.Invoke(conv, rspRpcData);
                     }
                 }

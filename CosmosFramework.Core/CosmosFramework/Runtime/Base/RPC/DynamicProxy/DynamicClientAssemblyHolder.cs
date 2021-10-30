@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Cosmos.RPC.Client
+﻿namespace Cosmos.RPC.Client
 {
     internal class DynamicClientAssemblyHolder
     {

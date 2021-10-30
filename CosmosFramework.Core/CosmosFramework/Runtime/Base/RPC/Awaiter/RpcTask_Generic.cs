@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Cosmos.RPC.Core;
+using System;
 using System.Runtime.CompilerServices;
 namespace Cosmos.RPC
 {
     /// <summary>
     /// 带参返回RPC；
     /// </summary>
-    internal class RpcTask<T> : INotifyCompletion, IRpcTask
+    public class RpcTask<T> : INotifyCompletion, IRpcTask
     {
         public long TaskId { get; private set; }
         T rawData;
@@ -14,10 +15,10 @@ namespace Cosmos.RPC
         Action continuation;
         int curretPackageLength;
         byte[] rcvSeg = new byte[0];
-        public RpcTask(RPCData reqRpcData)
+        public RpcTask(long rpcTaskId)
         {
-            TaskId = reqRpcData.RpcDataId;
-            RPCTaskService.Instance.AddTask(this);
+            TaskId = rpcTaskId;
+            RPCTaskManager.Instance.AddTask(this);
         }
         public bool IsCompleted
         {
@@ -32,12 +33,11 @@ namespace Cosmos.RPC
                 }
             }
         }
-        public void RspRpcData(RPCData rpcData)
+        public void RspRpcData(byte[] returnDataBytes, Type returnDataType)
         {
             try
             {
-                var returnData = rpcData.ReturnData;
-                rawData = (T)RPCUtility.Serialization.Deserialize(rpcData.ReturnData.Value, rpcData.ReturnData.ParameterType);
+                rawData = (T)RPCUtility.Serialization.Deserialize(returnDataBytes, returnDataType);
             }
             catch (Exception e)
             {

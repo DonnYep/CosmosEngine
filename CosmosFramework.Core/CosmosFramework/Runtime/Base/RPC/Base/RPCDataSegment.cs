@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Cosmos.RPC
+namespace Cosmos.RPC.Core
 {
     internal struct RPCDataSegment
     {

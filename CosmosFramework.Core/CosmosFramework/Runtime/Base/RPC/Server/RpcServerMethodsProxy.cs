@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Reflection;
+using Cosmos.RPC.Core;
 
-namespace Cosmos.RPC
+namespace Cosmos.RPC.Server
 {
     internal class RpcServerMethodsProxy
     {
-        ConcurrentDictionary<Type, MethodMap> methodDict;
+        ConcurrentDictionary<Type, RPCMethodMap> methodDict;
         Dictionary<string, Type> stringTypeDict;
-        Action<int, RPCData> sendRspMessage;
-        public RpcServerMethodsProxy(Action<int, RPCData> sendMessage)
+        Action<int, RPCInvokeData> sendRspMessage;
+        public RpcServerMethodsProxy(Action<int, RPCInvokeData> sendMessage)
         {
             sendRspMessage = sendMessage;
-            methodDict = new ConcurrentDictionary<Type, MethodMap>();
+            methodDict = new ConcurrentDictionary<Type, RPCMethodMap>();
             stringTypeDict = new Dictionary<string, Type>();
         }
         public void RegisterAppDomainTypes()
@@ -52,7 +53,7 @@ namespace Cosmos.RPC
         {
             if (!methodDict.ContainsKey(type))
             {
-                var miMap = new MethodMap(sendRspMessage);
+                var miMap = new RPCMethodMap(sendRspMessage);
                 methodDict.TryAdd(type, miMap);
                 stringTypeDict.TryAdd(type.FullName, type);
                 var methods = Utility.Assembly.GetTypeMethodsByAttribute<RPCMemberAttribute>(type);
@@ -72,7 +73,7 @@ namespace Cosmos.RPC
                 stringTypeDict.Remove(type.FullName);
             }
         }
-        public bool InvokeReq(int conv,RPCData reqRpcData)
+        public bool InvokeReq(int conv,RPCInvokeData reqRpcData)
         {
             var result = false;
             if (stringTypeDict.TryGetValue(reqRpcData.TypeFullName, out var type))
