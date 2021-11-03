@@ -2,10 +2,11 @@
 // for use in Mirror, DOTSNET, testing, etc.
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 
-namespace kcp 
+namespace kcp
 {
     public class KcpServer
     {
@@ -53,7 +54,7 @@ namespace kcp
         readonly byte[] rawReceiveBuffer = new byte[Kcp.MTU_DEF];
 
         // connections <connectionId, connection> where connectionId is EndPoint.GetHashCode
-        public Dictionary<int, KcpServerConnection> connections = new Dictionary<int, KcpServerConnection>();
+        public ConcurrentDictionary<int, KcpServerConnection> connections = new ConcurrentDictionary<int, KcpServerConnection>();
 
         public KcpServer(Action<int> OnConnected,
                          Action<int, ArraySegment<byte>> OnData,
@@ -177,7 +178,7 @@ namespace kcp
                                 connection.SendHandshake();
 
                                 // add to connections dict after being authenticated.
-                                connections.Add(connectionId, connection);
+                                connections.TryAdd(connectionId, connection);
                                 KCPLog.Info($"KCP: server added connection({connectionId}): {newClientEP}");
 
                                 // setup Data + Disconnected events only AFTER the
@@ -235,7 +236,7 @@ namespace kcp
                     }
                 }
                 // this is fine, the socket might have been closed in the other end
-                catch (SocketException) {}
+                catch (SocketException) { }
             }
 
             // process inputs for all server connections

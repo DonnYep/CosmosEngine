@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
- using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace kcp
 {
-    public class KcpClientService:KcpServiceBase
+    public class KcpClientService : KcpServiceBase
     {
         KcpClient client;
 
@@ -44,11 +39,11 @@ namespace kcp
         {
             client.Connect(address, Port, NoDelay, Interval, FastResend, CongestionWindow, SendWindowSize, ReceiveWindowSize);
         }
-        public override void ServiceDisconnect(int connectionId=0)
+        public override void ServiceDisconnect(int connectionId = 0)
         {
             client.Disconnect();
         }
-        public override void ServiceSend(KcpChannel channelId, ArraySegment<byte> segment, int connectionId=0)
+        public override void ServiceSend(KcpChannel channelId, ArraySegment<byte> segment, int connectionId = 0)
         {
             // switch to kcp channel.
             // unreliable or reliable.

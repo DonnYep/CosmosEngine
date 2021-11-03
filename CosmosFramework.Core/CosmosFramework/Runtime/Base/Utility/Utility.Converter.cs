@@ -228,32 +228,13 @@ namespace Cosmos
             /// <returns>格式化后的单位</returns>
             public static string FormatBytesSize(long bytes, int decimals = 2)
             {
-                string[] Suffix = { "Byte", "KB", "MB", "GB", "TB" };
+                string[] suffix = { "Byte", "KB", "MB", "GB", "TB" };
                 int i = 0;
                 double dblSByte = bytes;
                 if (bytes > 1024)
                     for (i = 0; (bytes / 1024) > 0; i++, bytes /= 1024)
                         dblSByte = bytes / 1024.0;
-                return $"{Math.Round(dblSByte, decimals)}{Suffix[i]}";
-            }
-            /// <summary>
-            /// 变换数组，返回与原数组相等长度的新数组；
-            /// 新数组中会包含空元素，得到后需要二次处理；
-            /// </summary>
-            /// <typeparam name="T">原始数组的类型</typeparam>
-            /// <typeparam name="K">变换后的数组类型</typeparam>
-            /// <param name="array">原始数组</param>
-            /// <param name="handler">执行函数</param>
-            /// <returns>变换后的数组</returns>
-            public static K[] ConvertArray<T, K>(T[] array, Func<T, K> handler)
-            {
-                var length = array.Length;
-                var dstArray = new K[length];
-                for (int i = 0; i < length; i++)
-                {
-                    dstArray[i] = handler.Invoke(array[i]);
-                }
-                return dstArray;
+                return $"{Math.Round(dblSByte, decimals)}{suffix[i]}";
             }
         }
     }
