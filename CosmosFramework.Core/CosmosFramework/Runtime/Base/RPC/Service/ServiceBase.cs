@@ -18,7 +18,6 @@ namespace Cosmos.RPC
             return new RpcTask(reqRpcData.RpcDataId);
         }
         protected async Task<T> AwaitResultfulRpcTask<T>(RpcTask<T> rpcTask)
-            where T:class
         {
             return await rpcTask;
         }

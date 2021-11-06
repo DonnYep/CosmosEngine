@@ -7,8 +7,47 @@ namespace Cosmos
     /// <summary>
     /// LRU缓存Least Recently Used
     /// </summary>
-    public class LRUCache<Key, Value> : IEnumerable<Value>
+    public class LruDictionary<Key,Value>:IEnumerable<Value>
     {
+        struct LruEnumerator<T> : IEnumerator<T>
+        {
+            T current;
+            int index;
+            T[] list;
+            public LruEnumerator(ICollection<T> collection)
+            {
+                current = default(T);
+                index = -1;
+                // TODO 并不优化的数据结构，LRU
+                list = new T[collection.Count];
+                int tmpIndex = -1;
+                foreach (var v in collection)
+                {
+                    list[++tmpIndex] = v;
+                }
+            }
+            public T Current { get { return current; } }
+            object IEnumerator.Current { get { return Current; } }
+            public void Dispose()
+            {
+                index = -1;
+                current = default(T);
+                list = null;
+            }
+            public bool MoveNext()
+            {
+                if (++index >= list.Length)
+                    return false;
+                else
+                    current = list[index];
+                return true;
+            }
+            public void Reset()
+            {
+                index = -1;
+            }
+        }
+
         // TODO LRUCache实现IDictionary接口
 
         Action<Value> overflow;
@@ -47,9 +86,9 @@ namespace Cosmos
                     locker.EnterReadLock();
                     try
                     {
-                        value = dictionary[key];
+                        value= dictionary[key];
                     }
-                    finally { locker.ExitReadLock(); }
+                    finally {locker.ExitReadLock();}
                 }
                 return value;
             }
@@ -70,8 +109,8 @@ namespace Cosmos
                 }
             }
         }
-        public LRUCache() : this(DEFAULT_CAPACITY) { }
-        public LRUCache(uint capacity)
+        public LruDictionary() : this(DEFAULT_CAPACITY) { }
+        public LruDictionary (uint capacity)
         {
             locker = new ReaderWriterLockSlim();
             this.capacity = capacity > 0 ? capacity : DEFAULT_CAPACITY;
@@ -237,7 +276,7 @@ namespace Cosmos
         #region IEnumerable
         public IEnumerator<Value> GetEnumerator()
         {
-            return new LRUCacheIEnumerator<Value>(dictionary.Values);
+            return new LruEnumerator<Value>(dictionary.Values);
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -249,9 +288,9 @@ namespace Cosmos
         /// 重置数组长度；当前重置长度，除非数值比原先大，否则使用原有容量
         /// </summary>
         /// <param name="capacity">新的数组长度</param>
-        public void ResetCapacity(uint capacity)
+        public void ResetCapacity(uint capacity )
         {
-            this.capacity = capacity > this.capacity ? capacity : this.capacity;
+            this.capacity = capacity >this.capacity  ? capacity : this.capacity;
         }
     }
 }

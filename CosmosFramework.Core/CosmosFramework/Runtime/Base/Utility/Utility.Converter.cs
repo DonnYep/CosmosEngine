@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading.Tasks;
 namespace Cosmos
 {
     public static partial class Utility
@@ -12,128 +7,26 @@ namespace Cosmos
         public static class Converter
         {
             static StringBuilder stringBuilderCache = new StringBuilder(1024);
-            //TODO Converter 转换工具需要完善
-            public static string GetString(byte[] value)
+            /// <summary>
+            ///从UFT-8编码到Base64； 
+            /// </summary>
+            /// <param name="message">待编码的信息</param>
+            /// <returns>编码后的信息</returns>
+            public static string EnecodeBase64String(string message)
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("Value is invalid");
-                }
-                return Encoding.UTF8.GetString(value);
-            }
-            public static byte[] GetBytes(string value)
-            {
-                return Encoding.UTF8.GetBytes(value);
-            }
-            public static void GetBytes(bool value, byte[] buffer, int startIndex)
-            {
-                if (buffer == null)
-                {
-                    throw new ArgumentNullException("Buffer is invalid.");
-                }
-                if (startIndex < 0 || startIndex + 1 > buffer.Length)
-                {
-                    throw new ArgumentNullException("Start index is invalid.");
-                }
-                buffer[startIndex] = value ? (byte)1 : (byte)0;
-            }
-            public static string GetString(byte[] value, int startIndex, int length)
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("Value is invalid.");
-                }
-                return Encoding.UTF8.GetString(value, startIndex, length);
+                var msg = Encoding.GetEncoding("utf-8").GetBytes(message);
+                return Convert.ToBase64String(msg);
             }
             /// <summary>
-            ///T是一个类的对象，由object转换成class对象 
+            /// 从Base64解码到UTF-8格式
             /// </summary>
-            public static T ConvertToObject<T>(object arg)
-                where T : class
-            {
-                return arg as T;
-            }
-            /// <summary>
-            /// object类型转换
-            /// </summary>
-            public static int Int(object arg)
-            {
-                return Convert.ToInt32(arg);
-            }
-            /// <summary>
-            /// object类型转换
-            /// </summary>
-            public static float Float(object arg)
-            {
-                return (float)System.Math.Round(Convert.ToSingle(arg));
-            }
-            /// <summary>
-            /// object类型转换
-            /// </summary>
-            public static long Long(object arg)
-            {
-                return Convert.ToInt64(arg);
-            }
-            /// <summary>
-            /// 解码到标准UTF-8格式
-            /// </summary>
-            public static string DecodeString(string message)
+            /// <param name="message">待解码的信息</param>
+            /// <returns>解码后的信息</returns>
+            public static string DecodeBase64String(string message)
             {
                 byte[] bytes = Convert.FromBase64String(message);
                 return Encoding.GetEncoding("utf-8").GetString(bytes);
             }
-            /// <summary>
-            /// 编码到标准UTF-8格式
-            /// </summary>
-            public static string EncodeString(string message)
-            {
-                byte[] bytes = Encoding.GetEncoding("utf-8").GetBytes(message);
-                return Convert.ToBase64String(bytes);
-            }
-            public static byte[] ConvertToByte(string value)
-            {
-                byte[] byteArray = Encoding.Default.GetBytes(value);
-                return byteArray;
-            }
-            public static byte[] ConvertToByte(int value)
-            {
-                byte[] byteArray = BitConverter.GetBytes(value);
-                return byteArray;
-            }
-            public static byte[] ConvertToByte(float value)
-            {
-                byte[] byteArray = BitConverter.GetBytes(value);
-                return byteArray;
-            }
-            public static byte[] ConvertToByte(short value)
-            {
-                byte[] byteArray = BitConverter.GetBytes(value);
-                return byteArray;
-            }
-            public static byte[] ConvertToByte(ushort value)
-            {
-                byte[] byteArray = BitConverter.GetBytes(value);
-                return byteArray;
-            }
-            public static byte[] ConvertToByte(bool value)
-            {
-                byte[] byteArray = BitConverter.GetBytes(value);
-                return byteArray;
-            }
-            public static string ConvertToString(int value)
-            {
-                return Utility.Text.Format(Convert.ToString(value, 2));
-            }
-            public static string ConvertToString(byte[] value)
-            {
-                string str = BitConverter.ToString(value);
-                return str;
-            }
-            /// <summary>
-            /// 转换成16进制的字符串
-            /// </summary>
-            /// <param name="bytes">byte数据</param>
-            /// <returns>转换后的16进制string</returns>
             public static string ConvertToHexString(byte[] bytes)
             {
                 string hexString = string.Empty;
@@ -184,40 +77,6 @@ namespace Cosmos
                 {
                     var result = srcValue * (int)Math.Pow(10, length - len);
                     return result;
-                }
-            }
-            /// <summary>
-            /// 将对象序列化为byte数组；
-            /// </summary>
-            /// <param name="obj">需要序列化的对象</param>
-            /// <returns>序列化后的byte数组</returns>
-            public static byte[] SerializeToByteArray(object obj)
-            {
-                if (obj == null)
-                    throw new ArgumentNullException("Object is invalid ! ");
-                using (var ms = new MemoryStream())
-                {
-                    var formatter = new BinaryFormatter();
-                    formatter.Serialize(ms, obj);
-                    return ms.ToArray();
-                }
-            }
-            /// <summary>
-            /// 将byte数组反序列化为object；
-            /// </summary>
-            /// <param name="context">需要被反序列化的byte数组</param>
-            /// <returns>反序列化后的object对象</returns>
-            public static object DeserializeToObject(byte[] context)
-            {
-                if (context == null)
-                    throw new ArgumentNullException("Context is invalid ! ");
-                using (var ms = new MemoryStream())
-                {
-                    var formatter = new BinaryFormatter();
-                    ms.Write(context, 0, context.Length);
-                    ms.Seek(0, SeekOrigin.Begin);
-                    var obj = formatter.Deserialize(ms);
-                    return obj;
                 }
             }
             /// <summary>
