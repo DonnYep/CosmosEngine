@@ -525,6 +525,28 @@ where K : class
                 return attributes.ToArray();
             }
             /// <summary>
+            /// 通过特性获取类；
+            /// </summary>
+            /// <typeparam name="T">查找的指定类型</typeparam>
+            /// <param name="assembly">目标程序集</param>
+            /// <param name="inherit">是否查找基类中的特性</param>
+            /// <returns>查找到的类型</returns>
+            public static Type[] GetTypesByAttribute<T>(System.Reflection.Assembly assembly, bool inherit = false)
+                where T : Attribute
+            {
+                var attributes = new List<Type>();
+                Type[] types = assembly.GetTypes();
+                var length = types.Length;
+                for (int i = 0; i < length; i++)
+                {
+                    if (types[i].IsDefined(typeof(T), inherit))
+                    {
+                        attributes.Add(types[i]);
+                    }
+                }
+                return attributes.ToArray();
+            }
+            /// <summary>
             /// 获取指定类型中，挂载了目标特性的方法信息；
             /// </summary>
             /// <typeparam name="T">查找的指定类型</typeparam>

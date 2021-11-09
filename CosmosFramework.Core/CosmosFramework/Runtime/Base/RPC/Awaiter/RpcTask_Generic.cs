@@ -37,12 +37,14 @@ namespace Cosmos.RPC
         {
             try
             {
-                rawData = (T)RPCUtility.Serialization.Deserialize(returnDataBytes, returnDataType);
+                if (returnDataBytes.Length != 0)
+                    rawData = (T)RPCUtility.Serialization.Deserialize(returnDataBytes, returnDataType);
+                else
+                    rawData = default;
             }
-            catch (Exception e)
+            catch
             {
                 rawData = default;
-                Utility.Debug.LogError(e);
             }
             IsCompleted = true;
         }
@@ -66,7 +68,7 @@ namespace Cosmos.RPC
                 IsCompleted = true;
             }
         }
-        public T GetResult(){return rawData;}
+        public T GetResult() { return rawData; }
         public RpcTask<T> GetAwaiter()
         {
             return this;

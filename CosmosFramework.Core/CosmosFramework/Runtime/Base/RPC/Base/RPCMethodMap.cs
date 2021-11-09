@@ -56,13 +56,13 @@ namespace Cosmos.RPC.Core
                 if (typeof(Task).IsAssignableFrom(method.ReturnType))
                 {
                     //Task只支持带参数泛型；
-                    var paramTypes = method.ReturnParameter.ParameterType.GetTypeInfo().GenericTypeArguments;
+                    var retParamTypes = method.ReturnParameter.ParameterType.GetTypeInfo().GenericTypeArguments;
                     var resultData = AsyncInvokeMethod(method, paramDatas).Result;
-                    if (resultData != null)
+                    if (retParamTypes.Length > 0)
                     {
                         var rspRpcData = rpcData.Clone();
-                        var retType = paramTypes[0];
-                        var rstBin = RPCUtility.Serialization.Serialize(resultData,retType );
+                        var retType = retParamTypes[0];
+                        var rstBin = RPCUtility.Serialization.Serialize(resultData, retType);
                         rspRpcData.ReturnData = new RPCParamData(retType, rstBin);
                         sendRspMessage.Invoke(conv, rspRpcData);
                     }
@@ -74,12 +74,28 @@ namespace Cosmos.RPC.Core
                 }
                 else
                 {
+                    var retParamTypes = method.ReturnParameter.ParameterType;
                     var resultData = method.Invoke(instance, paramDatas);
-                    if (resultData != null)
+                    if (retParamTypes != typeof(void))
+                    {
+                        if (resultData != null)
+                        {
+                            var rspRpcData = rpcData.Clone();
+                            var rstBin = RPCUtility.Serialization.Serialize(resultData, method.ReturnType);
+                            rspRpcData.ReturnData = new RPCParamData(method.ReturnType, rstBin);
+                            sendRspMessage.Invoke(conv, rspRpcData);
+                        }
+                        else
+                        {
+                            var rspRpcData = rpcData.Clone();
+                            rspRpcData.ReturnData = new RPCParamData(method.ReturnType, new byte[0]);
+                            sendRspMessage.Invoke(conv, rspRpcData);
+                        }
+                    }
+                    else
                     {
                         var rspRpcData = rpcData.Clone();
-                        var rstBin = RPCUtility.Serialization.Serialize(resultData, method.ReturnType);
-                        rspRpcData.ReturnData = new RPCParamData(method.ReturnType, rstBin);
+                        rspRpcData.ReturnData = new RPCParamData(typeof(void), new byte[0]);
                         sendRspMessage.Invoke(conv, rspRpcData);
                     }
                 }
@@ -91,10 +107,8 @@ namespace Cosmos.RPC.Core
             instance = null;
             methodDict.Clear();
         }
-
         async Task<object> AsyncInvokeMethod(MethodInfo method, object[] paramDatas)
         {
-            Utility.Debug.LogInfo("AsyncInvokeMethod<->" + method.Name);
             var task = (Task)method.Invoke(instance, paramDatas);
             await task;
             var resultProperty = task.GetType().GetProperty("Result");
