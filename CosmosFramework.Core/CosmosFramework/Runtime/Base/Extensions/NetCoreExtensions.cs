@@ -126,4 +126,14 @@ public static class NetCoreExtensions
     {
         return dict.TryRemove(key, out _ );
     }
+    public static TValue First<TValue>(this List<TValue> list)
+    {
+        var result = list[0];
+        return result;
+    }
+    public static TValue Last<TValue>(this List<TValue> list)
+    {
+        var result = list[list.Count - 1];
+        return result;
+    }
 }
