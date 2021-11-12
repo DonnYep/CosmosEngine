@@ -1,6 +1,6 @@
 # CosmosEngine
 
- CosmosEngine是一款轻量级的服务器框架，提供高速可靠UDP传输协议。网络模块支持多服务器交互，可扩展成分布式服务。默认使用KCP进行传输，服务稳定性能高效。
+ CosmosEngine是一款轻量级的服务器框架，提供高速可靠UDP传输协议。支持网络多通道、服务器间RPC大数据流传输通讯，非常容易改成分布式服务器。本框架长期维护更新，LTS。
 
 ## 环境
 
@@ -70,6 +70,6 @@
 
 - KCP地址：https://github.com/skywind3000/kcp
 
-- MVVM的纯C#版本：https://github.com/DonnYep/CosmosMVVM
+- PureMVC地址：https://github.com/DonnYep/PureMVC
 
 - Cosmos Unity客户端框架：https://github.com/DonnYep/CosmosFramework
