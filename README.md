@@ -45,11 +45,54 @@
 
 ## 注意事项
 
-- 自定义模块请参考原生模块的写法：
-    - 1、继承自Module，并打上ModuleAttribute的特性。
-    - 2、自定义一个与模块类名相同的接口，此接口派生自IModuleManager。
-    - 3、在此接口写入需要开放给外部调用的方法属性等。
-
+- 自定义模块实现：
+    
+```csharp
+    using Cosmos;
+    public interface IMyManager : IModuleManager
+    {
+        //自定义一个接口，使自定义的接口继承自IModuleManager
+    }
+```
+    
+```csharp
+    using Cosmos;
+    [Module]
+    internal class MyManager :Module, IMyManager
+    {
+        //创建接口对应的类，继承自Module与IMyManager，并标记上[Module]特性
+        //完成以上步骤后，MyManager作为一个模块就被自动生成了。
+        //以此种方法定义的模块，被生成后等同于原生模块，享有完全相同的生命周期。
+    
+        [TickRefresh]
+        void TickRefresh()
+        {
+            //被标记上[TickRefresh]的方法将在Update中执行；
+        }
+        [LateRefresh]
+        void LateRefresh()
+        {
+            //被标记上[LateRefresh]的方法将在LateUpdate中执行；
+        }
+        [FixedRefresh]
+        void FixedRefresh()
+        {
+            //被标记上[FixedRefresh]的方法将在FixedUpdate中执行；
+        }
+    
+        //一个模块中只允许拥有一个#Refresh类函数。
+    }
+```
+ - 自定义模块入口实现：
+```csharp
+    using Cosmos;
+    public class MyEntry:Cosmos.CosmosEntry
+    {
+        //自定义实现一个类作为项目的模块入口，并继承自CosmosEntry。
+        //将自定义实现的模块按照以下格式写成静态属性，则整个游戏项目均可通过 MyEntry获取自定义以及原生的所有模块。
+        public static IMyManager MyManager { get { return GetModule<IMyManager>(); } }
+    }
+```
 - 内置生命周期适用于原生模块与自定义模块。若实现了自定义的扩展Module，则原生Module享有完全相同的生命周期以及调用级别，生命周期优先级依次为：
     - OnInitialization
     - OnActive
