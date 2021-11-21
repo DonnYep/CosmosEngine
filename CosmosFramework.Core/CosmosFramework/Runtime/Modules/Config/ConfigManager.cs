@@ -65,9 +65,8 @@ namespace Cosmos.Config
             ConfigData? configData = GetConfigData(configName);
             if (!configData.HasValue)
             {
-                throw new ArgumentNullException(Utility.Text.Format("Config name '{0}' is not exist.", configName));
+                throw new ArgumentNullException($"Config name '{configName}' is not exist!");
             }
-
             return configData.Value.BoolValue;
         }
         /// <summary>
@@ -91,7 +90,7 @@ namespace Cosmos.Config
             ConfigData? configData = GetConfigData(configName);
             if (!configData.HasValue)
             {
-                throw new ArgumentNullException(Utility.Text.Format("Config name '{0}' is not exist.", configName));
+                throw new ArgumentNullException($"Config name '{configName}' is not exist!");
             }
             return configData.Value.IntValue;
         }
@@ -116,9 +115,8 @@ namespace Cosmos.Config
             ConfigData? configData = GetConfigData(configName);
             if (!configData.HasValue)
             {
-                throw new ArgumentNullException(Utility.Text.Format("Config name '{0}' is not exist.", configName));
+                throw new ArgumentNullException($"Config name '{configName}' is not exist!");
             }
-
             return configData.Value.FloatValue;
         }
         /// <summary>
@@ -142,7 +140,7 @@ namespace Cosmos.Config
             ConfigData? configData = GetConfigData(configName);
             if (!configData.HasValue)
             {
-                throw new ArgumentNullException(Utility.Text.Format("Config name '{0}' is not exist.", configName));
+                throw new ArgumentNullException($"Config name '{configName}' is not exist!");
             }
             return configData.Value.StringValue;
         }
