@@ -19,9 +19,9 @@ namespace Cosmos
             /// </summary>
             static UTF8Encoding utf8Encoding = new UTF8Encoding(false);
             /// <summary>
-            /// Get current application path;
+            /// Get application absolute path;
             /// </summary>
-            /// <returns>application path</returns>
+            /// <returns>path</returns>
             public static string ApplicationPath()
             {
                 return Path.GetFullPath(".");
