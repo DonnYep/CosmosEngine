@@ -1,4 +1,4 @@
-﻿using kcp;
+﻿using Telepathy;
 using System;
 using Cosmos.RPC.Core;
 
@@ -18,38 +18,36 @@ namespace Cosmos.RPC.Client
             add { onDisconnected += value; }
             remove { onDisconnected -= value; }
         }
-        KcpClientService kcpClientService;
+
+        Telepathy.Client client;
         RpcClientMethodsProxy methodsProxy;
         public bool IsConnect { get; private set; }
         public RPCClient()
         {
-            kcpClientService = new KcpClientService();
+            client = new Telepathy.Client(RPCConstants.TcpMaxMessageSize);
             methodsProxy = new RpcClientMethodsProxy();
         }
-        public void Connect(string ip, ushort port)
+        public void Connect(string ip, int port)
         {
-            kcpClientService.ServiceSetup();
-            kcpClientService.OnClientDataReceived += OnReceiveDataHandler;
-            kcpClientService.OnClientConnected += OnConnectHandler;
-            kcpClientService.OnClientDisconnected += OnDisconnectHandler;
-            kcpClientService.ServiceUnpause();
-            kcpClientService.Port = port;
-            kcpClientService.ServiceConnect(ip);
+            client.OnConnected += OnConnectHandler;
+            client.OnDisconnected += OnDisconnectHandler;
+            client.OnData += OnDataHandler;
+            client.Connect(ip, port);
         }
         public void SendMessage(byte[] data)
         {
             if (!IsConnect)
                 return;
             var arraySegment = new ArraySegment<byte>(data);
-            kcpClientService.ServiceSend(KcpChannel.Reliable, arraySegment);
+            client.Send(arraySegment);
         }
         public void Disconnect()
         {
-            kcpClientService?.ServiceDisconnect();
+            client.Disconnect();
         }
         public void TickRefresh()
         {
-            kcpClientService?.ServiceTick();
+            client.Tick(100);
         }
         public static T Create<T>(RPCClient client) where T : IService<T>
         {
@@ -67,7 +65,7 @@ namespace Cosmos.RPC.Client
             IsConnect = true;
             onConnected?.Invoke();
         }
-        void OnReceiveDataHandler(ArraySegment<byte> arrSeg, byte channel)
+        void OnDataHandler(ArraySegment<byte> arrSeg)
         {
             var rcvLen = arrSeg.Count;
             var rcvData = new byte[rcvLen];

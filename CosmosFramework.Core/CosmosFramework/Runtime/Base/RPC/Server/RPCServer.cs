@@ -5,13 +5,14 @@ using System.Threading;
 using System.Text;
 using kcp;
 using Cosmos.RPC.Core;
-
+using Telepathy;
 namespace Cosmos.RPC.Server
 {
     public class RPCServer
     {
+        Telepathy.Server server;
         RpcServerMethodsProxy methodsProxy;
-        KcpServerService kcpServerService;
+
         RpcSubpackageProcesser rpcSubpackageProcesser;
         Action<int> onConnected;
         Action<int> onDisconnected;
@@ -31,31 +32,25 @@ namespace Cosmos.RPC.Server
             add { onDisconnected += value; }
             remove { onDisconnected -= value; }
         }
-        public RPCServer(ushort port)
+        public RPCServer()
         {
-            kcpServerService = new KcpServerService();
-            kcpServerService.Port = port;
+            server = new Telepathy.Server(RPCConstants.TcpMaxMessageSize);
             methodsProxy = new RpcServerMethodsProxy(SendRpcData);
             rpcSubpackageProcesser = new RpcSubpackageProcesser(SendMessage);
         }
-        public void Start()
+        public void Start(int port)
         {
-            kcpServerService.ServiceSetup();
-            kcpServerService.ServiceUnpause();
-
-            kcpServerService.OnServerDataReceived += OnReceiveDataHandler;
-            kcpServerService.OnServerDisconnected += OnDisconnectedHandler;
-            kcpServerService.OnServerConnected += OnConnectedHandler;
-            kcpServerService.ServiceConnect();
+            server.OnConnected += OnConnectedHandler;
+            server.OnDisconnected += OnDisconnectedHandler;
+            server.OnData += OnDataHandler;
+            server.Start(port);
             methodsProxy.RegisterAppDomainTypes();
         }
-        public void Abort()
+        public void Stop()
         {
-            kcpServerService?.ServicePause();
-            kcpServerService.OnServerDataReceived -= OnReceiveDataHandler;
-            kcpServerService.OnServerDisconnected -= OnDisconnectedHandler;
-            kcpServerService.OnServerConnected -= OnConnectedHandler;
-            kcpServerService?.ServerServiceStop();
+            server.OnConnected -= OnConnectedHandler;
+            server.OnDisconnected -= OnDisconnectedHandler;
+            server.OnData -= OnDataHandler;
             onAbort?.Invoke();
         }
         /// <summary>
@@ -65,11 +60,11 @@ namespace Cosmos.RPC.Server
         /// <returns></returns>
         public string GetConnectionAddress(int conv)
         {
-            return kcpServerService.Server.GetClientAddress(conv);
+            return server.GetClientAddress(conv);
         }
         public void TickRefresh()
         {
-            kcpServerService?.ServiceTick();
+            server.Tick(100);
             rpcSubpackageProcesser.TickRefresh();
         }
         /// <summary>
@@ -78,7 +73,7 @@ namespace Cosmos.RPC.Server
         void SendMessage(int conv, byte[] data)
         {
             var segment = new ArraySegment<byte>(data);
-            kcpServerService.ServiceSend(KcpChannel.Reliable, segment, conv);
+            server.Send(conv, segment);
         }
         /// <summary>
         /// 发送rpcdata;
@@ -106,14 +101,11 @@ namespace Cosmos.RPC.Server
         {
             onConnected?.Invoke(conv);
         }
-        void OnReceiveDataHandler(int conv, ArraySegment<byte> arrSeg, int Channel)
+        void OnDataHandler(int conv, ArraySegment<byte> arrSeg)
         {
-            var rcvLen = arrSeg.Count;
-            var rcvData = new byte[rcvLen];
-            Array.Copy(arrSeg.Array, 1, rcvData, 0, rcvLen);
             try
             {
-                var rpcData = RPCUtility.Serialization.Deserialize<RPCInvokeData>(rcvData);
+                var rpcData = RPCUtility.Serialization.Deserialize<RPCInvokeData>(arrSeg.Array);
                 methodsProxy.InvokeReq(conv, rpcData);
             }
             catch (Exception e)
