@@ -6,7 +6,7 @@
         /// TCP 单包最大尺寸 1<<18;
         /// 262144===256KB
         /// </summary>
-        public const int TcpMaxMessageSize = 1 << 18;
+        public const int TcpMaxMessageSize= 1<<18;
         /// <summary>
         /// 一个rpc包最大的容量；240KB+
         /// </summary>

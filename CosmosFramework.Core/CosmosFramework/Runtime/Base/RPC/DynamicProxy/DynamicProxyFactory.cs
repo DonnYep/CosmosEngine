@@ -40,6 +40,12 @@ where T : IService<T>
             var baseType = typeof(ServiceBase);
             var interfaceMethods = interfaceTypeInfo.GetMethods();
 
+            if( DynamicClientAssemblyHolder.TypeDataProxy.TryGetType(typeof(T).Name,out var emittedType))
+            {
+                //如果已经emit过，则获取缓存进行实例对象生成；
+                return (T)Activator.CreateInstance(emittedType, client);
+            }
+
             var typeBuilder = DynamicClientAssemblyHolder.Assembly.DefineType(typeof(T).Name, TypeAttributes.Public, typeof(object));
             //设置基类；
             typeBuilder.SetParent(baseType);
@@ -157,7 +163,9 @@ where T : IService<T>
                 }
                 methodIL.Emit(OpCodes.Ret);
             }
-            var newObject = (T)Activator.CreateInstance(typeBuilder.CreateType(), client);
+            var type = typeBuilder.CreateType();
+            DynamicClientAssemblyHolder.TypeDataProxy.AddOrUpdate(type.Name, type);
+            var newObject = (T)Activator.CreateInstance(type, client);
             return newObject;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 namespace Cosmos.RPC
@@ -8,11 +9,12 @@ namespace Cosmos.RPC
         readonly object locker = new object();
         readonly AssemblyBuilder assemblyBuilder;
         readonly ModuleBuilder moduleBuilder;
-
+        readonly Dictionary<string, Type> stringTypeDict;
         public DynamicAssembly(string moduleName)
         {
             this.assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.Run);
             this.moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
+            this.stringTypeDict = new Dictionary<string, Type>();
         }
         public TypeBuilder DefineType(string name, TypeAttributes attr)
         {
@@ -34,6 +36,14 @@ namespace Cosmos.RPC
             {
                 return moduleBuilder.DefineType(name, attr, parent, interfaces);
             }
+        }
+        public void AddOrUpdate(string typeName,Type type)
+        {
+            stringTypeDict.AddOrUpdate(typeName, type);
+        }
+        public bool PeekType(string typeName,out Type type)
+        {
+            return stringTypeDict.TryGetValue(typeName, out type);
         }
     }
 }

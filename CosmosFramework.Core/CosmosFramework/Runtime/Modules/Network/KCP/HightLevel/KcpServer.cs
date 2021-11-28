@@ -251,7 +251,7 @@ namespace kcp
             //  while iterating connections)
             foreach (int connectionId in connectionsToRemove)
             {
-                connections.Remove(connectionId);
+                connections.TryRemove(connectionId,out _);
             }
             connectionsToRemove.Clear();
         }

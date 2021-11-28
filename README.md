@@ -10,7 +10,7 @@
 
 - **Event**：标准事件中心。提供的事件监听、派发皆为线程安全类型。
 
-- **Network**：网络模块。网络模块提供了几种可靠高速的UDP协议,默认使用KCP。网络以通道(Channel)形式区分各个连接，支持多种网络类型同时连接。可同时实现作为客户端(Client)以及服务器(Server),可自定义扩展成分布式。INetworkChannel支持Async/await语法。
+- **Network**：网络模块。提供了多种高速可靠的UDP协议，如RUDP、SUDP、KCP、TCP等，默认使用KCP协议。网络以通道(Channel)形式区分各个连接，支持多种网络类型同时连接。可同时实现作为客户端(Client)以及服务器(Server),可自定义扩展成分布式。INetworkChannel支持Async/await语法。
 
 - **Config**：配置模块。提供服务器初始化时加载解析配置文件服务。Runtime时可由其他模块进行存取修改。
 
@@ -22,11 +22,11 @@
 
 - **Singleton**：单例基类。提供了线程安全、非线程安全、MONO单例基类。
 
-- **DataStructure**：常用数据结构。链表、双向链表、二叉树、LRU、线程锁等数据结构。
+- **DataStructure**：常用数据结构。链表、双向链表、二叉树、LRU、线程锁、双向字典等数据结构。
 
 - **EventCore** ：轻量级事件模块，可自定义监听的数据类型；
 
-- **RPC** ：RPC功能模块。客户端只需要接口即可生成动态代理对象，无需手动实现。服务器只需在被调用的方法上标记[RPCMemberAttribute]特性，就能实现被客户端RPC调用。若RPC方法返回的数据量十分庞大，则自动转换为流式传输，客户端只需要使用async/await方法等待数据结果。
+- **RPC** ：RPC功能模块。客户端只需要接口即可生成动态代理对象，无需手动实现。服务器只需在被调用的方法上标记[RPCMemberAttribute]特性，就能实现被客户端RPC调用。RPC底层使用TCP协议，无需担心RPC方法返回的数据量，大数据会自动转换为流式传输，客户端只需要使用async/await方法等待数据结果即可。
 
 
 ## 内置架构 PureMVC
@@ -109,10 +109,17 @@
 
 - 数据结构中，提供了池的的底层对象“Pool”，引用池以及其他自定义实现的池皆为“Pool”作为底层实现；
 
-## 其他
 
-- KCP地址：https://github.com/skywind3000/kcp
+## Library link
 
-- PureMVC地址：https://github.com/DonnYep/PureMVC
+- CosmosFramework：https://github.com/DonnYep/CosmosFramework
 
-- Cosmos Unity客户端框架：https://github.com/DonnYep/CosmosFramework
+- KCP C:https://github.com/skywind3000/kcp
+    
+- KCP CSharp:https://github.com/vis2k/kcp2k
+    
+- TCP：https://github.com/vis2k/Telepathy
+
+- PureMVC：https://github.com/DonnYep/PureMVC
+
+- Mirror:https://github.com/vis2k/Mirror

@@ -18,7 +18,7 @@ namespace Cosmos.RPC.Client
             add { onDisconnected += value; }
             remove { onDisconnected -= value; }
         }
-
+        
         Telepathy.Client client;
         RpcClientMethodsProxy methodsProxy;
         public bool IsConnect { get; private set; }
@@ -30,9 +30,9 @@ namespace Cosmos.RPC.Client
         public void Connect(string ip, int port)
         {
             client.OnConnected += OnConnectHandler;
-            client.OnDisconnected += OnDisconnectHandler;
+            client.OnDisconnected+= OnDisconnectHandler;
             client.OnData += OnDataHandler;
-            client.Connect(ip, port);
+            client.Connect(ip,port);
         }
         public void SendMessage(byte[] data)
         {
