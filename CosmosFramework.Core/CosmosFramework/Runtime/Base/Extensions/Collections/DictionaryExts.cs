@@ -11,7 +11,15 @@ namespace Cosmos
         {
             return @this.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
         }
-        public static void AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, TValue value)
+        public static  bool Remove<TKey, TValue>(this IDictionary<TKey, TValue> @this,TKey key)
+        {
+            return @this.Remove(key,out _);
+        }
+        public static bool TryRemove<TKey, TValue>(this IDictionary<TKey, TValue> @this, TKey key,out TValue value)
+        {
+            return @this.Remove(key, out value);
+        }
+        public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, TValue value)
         {
             if (dict.ContainsKey(key))
             {
