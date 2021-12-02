@@ -18,7 +18,7 @@ namespace Cosmos.FSM
             add { fsmRefreshHandler += value; }
             remove { fsmRefreshHandler -= value; }
         }
-        public List<FSMBase> FSMSet { get { return fsmSet; } }
+        public List<FSMBase> FSMs { get { return fsmSet; } }
         public bool IsPause { get; set; }
         public int RefreshInterval { get; private set; }
         /// <summary>
