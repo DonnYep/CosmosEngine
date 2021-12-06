@@ -30,8 +30,8 @@ namespace Cosmos.FSM
         /// 若设置时间为小于等于0，则默认使用0；
         /// </summary>
         /// <typeparam name="T">类型目标</typeparam>
-        /// <param name="interval">轮询间隔</param>
-        public void SetFSMGroupRefreshInterval<T>(float interval)
+        /// <param name="interval">轮询间隔 毫秒</param>
+        public void SetFSMGroupRefreshInterval<T>(int interval)
            where T : class
         {
             Type type = typeof(T);
@@ -42,8 +42,8 @@ namespace Cosmos.FSM
         /// 若设置时间为小于等于0，则默认使用0；
         /// </summary>
         /// <param name="type">类型目标</param>
-        /// <param name="interval">轮询间隔</param>
-        public void SetFSMGroupRefreshInterval(Type type, float interval)
+        /// <param name="interval">轮询间隔 毫秒</param>
+        public void SetFSMGroupRefreshInterval(Type type, int interval)
         {
             if (HasFSMGroup(type))
                 fsmGroupDict[type].SetRefreshInterval(interval);

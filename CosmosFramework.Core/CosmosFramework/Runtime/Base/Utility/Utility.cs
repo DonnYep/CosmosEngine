@@ -59,16 +59,5 @@ namespace Cosmos
     /// </summary>
     public static partial class Utility
     {
-        /// <summary>
-        ///字典工具 
-        /// </summary>
-        public static K GetValue<T, K>(Dictionary<T, K> dict, T key)
-        {
-            K value =default(K);
-            bool isSuccess = dict.TryGetValue(key, out value);
-            if (isSuccess)
-                return value;
-            return value;
-        }
     }
 }

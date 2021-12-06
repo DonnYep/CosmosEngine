@@ -11,14 +11,14 @@ namespace Cosmos.FSM
     internal class FSMGroup : IFSMGroup
     {
         #region Properties
-        List<FSMBase> fsmSet = new List<FSMBase>();
+        List<FSMBase> fsmList = new List<FSMBase>();
         Action fsmRefreshHandler;
         event Action FsmRefreshHandler
         {
             add { fsmRefreshHandler += value; }
             remove { fsmRefreshHandler -= value; }
         }
-        public List<FSMBase> FSMs { get { return fsmSet; } }
+        public List<FSMBase> FSMList { get { return fsmList; } }
         public bool IsPause { get; set; }
         public int RefreshInterval { get; private set; }
         /// <summary>
@@ -32,9 +32,9 @@ namespace Cosmos.FSM
         public void OnUnPause(){ IsPause = false; }
         public void AddFSM(FSMBase fsm)
         {
-            if (!fsmSet.Contains(fsm))
+            if (!fsmList.Contains(fsm))
             {
-                fsmSet.Add(fsm);
+                fsmList.Add(fsm);
                 FsmRefreshHandler += fsm.OnRefresh;
             }
             else
@@ -42,16 +42,16 @@ namespace Cosmos.FSM
         }
         public void DestoryFSM(Predicate<FSMBase>predicate)
         {
-            var fsm= fsmSet.Find(predicate);
+            var fsm= fsmList.Find(predicate);
             if (fsm == null)
                 throw new ArgumentNullException("FSM not  exists" + predicate.ToString());
-            fsmSet.Remove(fsm);
+            fsmList.Remove(fsm);
             FsmRefreshHandler -= fsm.OnRefresh;
             fsm.Shutdown();
         }
         public void DestoryFSM(FSMBase fsm)
         {
-            fsmSet.Remove(fsm);
+            fsmList.Remove(fsm);
             FsmRefreshHandler -= fsm.OnRefresh;
             fsm.Shutdown();
         }
@@ -79,28 +79,28 @@ namespace Cosmos.FSM
         }
         public bool HasFSM(Predicate<FSMBase> predicate)
         {
-            return fsmSet.Find(predicate) == null;
+            return fsmList.Find(predicate) == null;
         }
         public bool HasFSM(FSMBase fsm)
         {
-            return fsmSet.Contains(fsm);
+            return fsmList.Contains(fsm);
         }
         public FSMBase GetFSM(Predicate<FSMBase> predicate)
         {
-            return fsmSet.Find(predicate);
+            return fsmList.Find(predicate);
         }
         public int GetFSMCount()
         {
-            return fsmSet.Count;
+            return fsmList.Count;
         }
         public void DestoryAllFSM()
         {
-            int length = fsmSet.Count;
+            int length = fsmList.Count;
             for (int i = 0; i < length; i++)
             {
-                fsmSet[i].Shutdown();
+                fsmList[i].Shutdown();
             }
-            fsmSet.Clear();
+            fsmList.Clear();
         }
         #endregion
     }

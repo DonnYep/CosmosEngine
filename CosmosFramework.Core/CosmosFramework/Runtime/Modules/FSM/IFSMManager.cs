@@ -10,14 +10,20 @@ namespace Cosmos
     public interface IFSMManager : IModuleManager
     {
         int FSMCount { get; }
-        void SetFSMGroupRefreshInterval<T>(float interval) where T : class;
+        /// <summary>
+        /// 为特定类型设置轮询间隔
+        /// 若设置时间为小于等于0，则默认使用0；
+        /// </summary>
+        /// <typeparam name="T">类型目标</typeparam>
+        /// <param name="interval">轮询间隔 毫秒</param>
+        void SetFSMGroupRefreshInterval<T>(int interval) where T : class;
         /// <summary>
         /// 为特定类型设置轮询间隔；
         /// 若设置时间为小于等于0，则默认使用0；
         /// </summary>
         /// <param name="type">类型目标</param>
-        /// <param name="interval">轮询间隔</param>
-        void SetFSMGroupRefreshInterval(Type type, float interval);
+        /// <param name="interval">轮询间隔 毫秒</param>
+        void SetFSMGroupRefreshInterval(Type type, int interval);
         /// <summary>
         /// 暂停指定类型fsm集合
         /// </summary>
