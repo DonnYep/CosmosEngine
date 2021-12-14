@@ -30,18 +30,18 @@ namespace CosmosEngine
             add { onReceiveData += value; }
             remove { onReceiveData -= value; }
         }
-        INetworkChannel networkChannel;
+        KCPServerChannel networkChannel;
         public void SendMessage(byte[] data,int conv)
         {
-            networkChannel.SendMessage(data,conv);
+            networkChannel.SendMessage(conv,data);
         }
         protected override void OnPreparatory()
         {
-            networkChannel = new KCPServerChannel("LocksetpServer", "localhost", port);
+            networkChannel = new KCPServerChannel("LocksetpServer",  port);
             networkChannel.OnConnected += OnConnectedHandle;
             networkChannel.OnDisconnected += OnDisconnectedHandle;
-            networkChannel.OnReceiveData += OnReceiveDataHandle;
-            networkChannel.Connect();
+            networkChannel.OnDataReceived+= OnReceiveDataHandle;
+            networkChannel.StartServer();
             CosmosEntry.NetworkManager.AddChannel(networkChannel);
             Utility.Debug.LogInfo(networkChannel.NetworkChannelKey + " Start Running");
         }

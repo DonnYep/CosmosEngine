@@ -4,29 +4,29 @@ namespace Cosmos.Network
 {
     public class WaitConnectedAwaiter : INotifyCompletion
     {
-        INetworkChannel networkChannel;
+        INetworkClientChannel channel;
         Action continuation;
-        public WaitConnectedAwaiter(INetworkChannel networkChannel)
+        public WaitConnectedAwaiter(INetworkClientChannel clientChannel, string ip, int port)
         {
-            this.networkChannel = networkChannel;
-            networkChannel.OnConnected += OnConnected;
-            networkChannel.Connect();
+            this.channel = clientChannel;
+            clientChannel.OnConnected += OnConnected;
+            clientChannel.Connect(ip, port);
         }
         public void OnCompleted(Action continuation)
         {
             this.continuation = continuation;
         }
-        public bool IsCompleted{ get;private set; }
+        public bool IsCompleted { get; private set; }
         public void GetResult() { }
         public WaitConnectedAwaiter GetAwaiter()
         {
             return this;
         }
-        void OnConnected(int conv)
+        void OnConnected()
         {
             continuation?.Invoke();
             IsCompleted = true;
-            networkChannel.OnConnected -= OnConnected;
+            channel.OnConnected -= OnConnected;
         }
     }
 }
