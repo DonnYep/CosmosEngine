@@ -30,7 +30,12 @@ namespace Cosmos
         Action<int> onConnected;
         Action<int> onDisconnected;
         Action<int, byte[]> onDataReceived;
-
+        Action onAbort;
+        public event Action OnAbort
+        {
+            add { onAbort += value; }
+            remove { onAbort -= value; }
+        }
         public event Action<int> OnConnected
         {
             add { onConnected += value; }
@@ -135,6 +140,7 @@ namespace Cosmos
         {
             StopServer();
             NetworkChannelKey = NetworkChannelKey.None;
+            onAbort?.Invoke();
         }
         void OnDisconnectedHandler(int conv)
         {

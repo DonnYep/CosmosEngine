@@ -12,6 +12,12 @@ namespace Cosmos
         ///  check if the server is running
         /// </summary>
         public bool Active{ get { return server.Active; } }
+        Action onAbort;
+        public event Action OnAbort
+        {
+            add { onAbort += value; }
+            remove { onAbort -= value; }
+        }
         public event Action<int> OnConnected
         {
             add { server.OnConnected += value; }
@@ -78,6 +84,7 @@ namespace Cosmos
         {
             StopServer();
             NetworkChannelKey = NetworkChannelKey.None;
+            onAbort?.Invoke();
         }
         void OnReceiveDataHandler(int conv, ArraySegment<byte> arrSeg)
         {

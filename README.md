@@ -1,3 +1,4 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://github.com/DonnYep/CosmosEngine/blob/main/LICENSE)
 # CosmosEngine
 
  CosmosEngine是一款轻量级的服务器框架，提供高速可靠UDP传输协议。支持网络多通道、服务器间RPC大数据流传输通讯，非常容易改成分布式服务器。本框架长期维护更新，LTS。
