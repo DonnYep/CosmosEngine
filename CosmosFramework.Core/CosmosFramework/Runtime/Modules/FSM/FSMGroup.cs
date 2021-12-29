@@ -8,18 +8,12 @@ namespace Cosmos.FSM
     /// <summary>
     /// 状态机容器
     /// </summary>
-    internal class FSMGroup 
+    internal class FSMGroup
     {
         #region Properties
         List<FSMBase> fsmList = new List<FSMBase>();
-        Action fsmRefreshHandler;
-        event Action FsmRefreshHandler
-        {
-            add { fsmRefreshHandler += value; }
-            remove { fsmRefreshHandler -= value; }
-        }
         public List<FSMBase> FSMList { get { return fsmList; } }
-        public bool IsPause { get; set; }
+        public bool IsPause { get; private set; }
         public int RefreshInterval { get; private set; }
         /// <summary>
         /// 上一次刷新时间
@@ -28,38 +22,32 @@ namespace Cosmos.FSM
         #endregion
 
         #region Methods
-        public void OnPause(){IsPause = true;}
-        public void OnUnPause(){ IsPause = false; }
+        public void OnPause() { IsPause = true; }
+        public void OnUnPause() { IsPause = false; }
         public void AddFSM(FSMBase fsm)
         {
             if (!fsmList.Contains(fsm))
-            {
                 fsmList.Add(fsm);
-                FsmRefreshHandler += fsm.OnRefresh;
-            }
             else
                 throw new ArgumentException(" FSM is exists" + fsm.OwnerType.ToString());
         }
-        public void DestoryFSM(Predicate<FSMBase>predicate)
+        public void DestoryFSM(Predicate<FSMBase> predicate)
         {
-            var fsm= fsmList.Find(predicate);
+            var fsm = fsmList.Find(predicate);
             if (fsm == null)
                 throw new ArgumentNullException("FSM not  exists" + predicate.ToString());
             fsmList.Remove(fsm);
-            FsmRefreshHandler -= fsm.OnRefresh;
             fsm.Shutdown();
         }
         public void DestoryFSM(FSMBase fsm)
         {
             fsmList.Remove(fsm);
-            FsmRefreshHandler -= fsm.OnRefresh;
             fsm.Shutdown();
         }
         public void SetRefreshInterval(int interval)
         {
             if (interval <= 0)
             {
-                Utility.Debug.LogError("FSM Refresh interval less than Zero, use Zero instead");
                 this.RefreshInterval = 0;
                 return;
             }
@@ -70,11 +58,15 @@ namespace Cosmos.FSM
         {
             if (IsPause)
                 return;
-            var msNow= Utility.Time.MillisecondNow();
+            var msNow = Utility.Time.MillisecondNow();
             if (latestTime <= msNow)
             {
                 latestTime = msNow + RefreshInterval;
-                fsmRefreshHandler?.Invoke();
+                int length = fsmList.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    fsmList[i].OnRefresh();
+                }
             }
         }
         public bool HasFSM(Predicate<FSMBase> predicate)
