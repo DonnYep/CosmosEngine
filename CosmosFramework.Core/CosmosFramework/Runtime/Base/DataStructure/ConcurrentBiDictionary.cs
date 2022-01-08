@@ -1,19 +1,22 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Collections;
 using System.Runtime.Serialization;
+
 namespace Cosmos
 {
     [Serializable]
-    public class BiDictionary<TFirst, TSecond> : IDictionary<TFirst, TSecond>, IReadOnlyDictionary<TFirst, TSecond>, IDictionary
+    public class ConcurrentBiDictionary<TFirst, TSecond> : IDictionary<TFirst, TSecond>, IReadOnlyDictionary<TFirst, TSecond>, IDictionary
     {
-        private readonly IDictionary<TFirst, TSecond> _firstToSecond = new Dictionary<TFirst, TSecond>();
+        private readonly IDictionary<TFirst, TSecond> _firstToSecond = new ConcurrentDictionary<TFirst, TSecond>();
         [NonSerialized]
-        private readonly IDictionary<TSecond, TFirst> _secondToFirst = new Dictionary<TSecond, TFirst>();
+        private readonly IDictionary<TSecond, TFirst> _secondToFirst = new ConcurrentDictionary<TSecond, TFirst>();
         [NonSerialized]
         private readonly ReverseDictionary _reverseDictionary;
 
-        public BiDictionary()
+        public ConcurrentBiDictionary()
         {
             _reverseDictionary = new ReverseDictionary(this);
         }
@@ -118,6 +121,12 @@ namespace Cosmos
             _firstToSecond.Add(key, value);
             _secondToFirst.Add(value, key);
         }
+
+        void IDictionary.Add(object key, object value)
+        {
+            ((IDictionary)_firstToSecond).Add(key, value);
+            ((IDictionary)_secondToFirst).Add(value, key);
+        }
         public bool TryAdd(TFirst key, TSecond value)
         {
             if (_firstToSecond.ContainsKey(key) || _secondToFirst.ContainsKey(value))
@@ -135,12 +144,6 @@ namespace Cosmos
             _firstToSecond.Add(key, value);
             _secondToFirst.Add(value, key);
         }
-        void IDictionary.Add(object key, object value)
-        {
-            ((IDictionary)_firstToSecond).Add(key, value);
-            ((IDictionary)_secondToFirst).Add(value, key);
-        }
-
         void ICollection<KeyValuePair<TFirst, TSecond>>.Add(KeyValuePair<TFirst, TSecond> item)
         {
             _firstToSecond.Add(item);
@@ -159,7 +162,7 @@ namespace Cosmos
 
         public bool TryGetValue(TFirst key, out TSecond value)
         {
-            return _firstToSecond.TryGetValue(key, out value)&&_secondToFirst.ContainsKey(value);
+            return _firstToSecond.TryGetValue(key, out value) && _secondToFirst.ContainsKey(value);
         }
 
         public bool Remove(TFirst key)
@@ -225,9 +228,9 @@ namespace Cosmos
 
         private class ReverseDictionary : IDictionary<TSecond, TFirst>, IReadOnlyDictionary<TSecond, TFirst>, IDictionary
         {
-            private readonly BiDictionary<TFirst, TSecond> _owner;
+            private readonly ConcurrentBiDictionary<TFirst, TSecond> _owner;
 
-            public ReverseDictionary(BiDictionary<TFirst, TSecond> owner)
+            public ReverseDictionary(ConcurrentBiDictionary  <TFirst, TSecond> owner)
             {
                 _owner = owner;
             }

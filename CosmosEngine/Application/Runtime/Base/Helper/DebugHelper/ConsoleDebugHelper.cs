@@ -84,12 +84,13 @@ namespace CosmosEngine
                 return;
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now} [ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n{st}";
+            StackTrace st0 = new StackTrace(new StackFrame(5, true));
+            string str = $"{DateTime.Now} [ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n{st}{st0}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()} [ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
+            string str = $"{DateTime.Now} [ - ] > ERROR : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
 #endif
             AppendWriteTextFile(logFullPath, str);
         }
@@ -99,12 +100,13 @@ namespace CosmosEngine
                 return;
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now} [ - ] > INFO : {msg}\nStackTrace[ - ] ：\n{st}";
+            StackTrace st0 = new StackTrace(new StackFrame(5, true));
+            string str = $"{DateTime.Now} [ - ] > INFO : {msg}\nStackTrace[ - ] ：\n{st}{st0}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()} [ - ] > INFO : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
+            string str = $"{DateTime.Now} [ - ] > INFO : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
 #endif
             AppendWriteTextFile(logFullPath, str);
         }
@@ -114,12 +116,13 @@ namespace CosmosEngine
                 return;
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now} [ - ] > WARN : {msg}\nStackTrace[ - ] ：\n{st}";
+            StackTrace st0 = new StackTrace(new StackFrame(5, true));
+            string str = $"{DateTime.Now} [ - ] > WARN : {msg}\nStackTrace[ - ] ：\n{st}{st0}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()} [ - ] > WARN : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
+            string str = $"{DateTime.Now} [ - ] > WARN : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
 #endif
             AppendWriteTextFile(logFullPath, str);
         }
@@ -129,12 +132,13 @@ namespace CosmosEngine
                 return;
 #if DEBUG
             StackTrace st = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now} [ - ] > FATAL : {msg}\nStackTrace[ - ] ：\n{st}";
+            StackTrace st0 = new StackTrace(new StackFrame(5, true));
+            string str = $"{DateTime.Now} [ - ] > FATAL : {msg}\nStackTrace[ - ] ：\n{st}{st0}";
 #else
             StackTrace st = new StackTrace(new StackFrame(2, true));
             StackTrace st0 = new StackTrace(new StackFrame(3, true));
             StackTrace st1 = new StackTrace(new StackFrame(4, true));
-            string str = $"{DateTime.Now.ToString()} [ - ] > FATAL : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
+            string str = $"{DateTime.Now} [ - ] > FATAL : {msg}\nStackTrace[ - ] ：\n{st}{st0}{st1}";
 #endif
             AppendWriteTextFile(logFullPath, str);
         }
@@ -155,9 +159,22 @@ namespace CosmosEngine
         /// </summary>
         /// <param name="sender">异常抛出者</param>
         /// <param name="e">未被捕获的异常</param>
-        static void UnhandledExceptionTrapper(object sender, UnhandledExceptionEventArgs e)
+        void UnhandledExceptionTrapper(object sender, UnhandledExceptionEventArgs e)
         {
-            Utility.Debug.LogError(e);
+            var now = DateTime.Now;
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine($"{now} [ - ] > ERROR CRASH: {e};");
+            Console.ResetColor();
+            StackTrace st = new StackTrace(new StackFrame(2, true));
+            StackTrace st0 = new StackTrace(new StackFrame(3, true));
+            StackTrace st1 = new StackTrace(new StackFrame(4, true));
+            StackTrace st2 = new StackTrace(new StackFrame(5, true));
+            StackTrace st3 = new StackTrace(new StackFrame(6, true));
+            StackTrace st4 = new StackTrace(new StackFrame(7, true));
+            StackTrace st5 = new StackTrace(new StackFrame(8, true));
+            StackTrace st6 = new StackTrace(new StackFrame(9, true));
+            string str = $"{now} [ - ] > ERROR CRASH: {e}\nStackTrace[ - ] ：\n{st}{st0}{st1}{st2}{st3}{st4}{st5}{st6}";
+            AppendWriteTextFile(logFullPath, str);
         }
     }
 }
