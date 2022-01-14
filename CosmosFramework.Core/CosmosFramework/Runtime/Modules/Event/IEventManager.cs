@@ -1,11 +1,6 @@
-﻿using Cosmos.Event;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
-namespace Cosmos
+namespace Cosmos.Event
 {
     public interface IEventManager: IModuleManager
     {

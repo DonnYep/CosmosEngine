@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-
 namespace Cosmos
 {
     public static partial class Utility

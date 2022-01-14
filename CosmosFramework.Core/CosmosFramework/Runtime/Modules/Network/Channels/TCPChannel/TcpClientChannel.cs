@@ -1,5 +1,4 @@
 ﻿using System;
-using Cosmos;
 using Cosmos.Network;
 using Telepathy;
 namespace Cosmos

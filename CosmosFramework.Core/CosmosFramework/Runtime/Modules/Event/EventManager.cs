@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System;
 namespace Cosmos.Event
 {

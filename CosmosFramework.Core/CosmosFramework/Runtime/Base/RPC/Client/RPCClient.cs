@@ -1,5 +1,4 @@
-﻿using Telepathy;
-using System;
+﻿using System;
 using Cosmos.RPC.Core;
 
 namespace Cosmos.RPC.Client

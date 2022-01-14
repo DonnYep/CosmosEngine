@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31025.194
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosEngine", "CosmosEngine.csproj", "{B4096260-B325-4C3A-8C5B-DF98DBE17D81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CosmosEngine", "CosmosEngine\CosmosEngine.csproj", "{B4096260-B325-4C3A-8C5B-DF98DBE17D81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosFramework.Core", "..\CosmosFramework.Core\CosmosFramework.Core.csproj", "{1421458D-CCEE-4F37-9A20-E34FB7497ABD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CosmosFramework.Core", "CosmosFramework.Core\CosmosFramework.Core.csproj", "{1421458D-CCEE-4F37-9A20-E34FB7497ABD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

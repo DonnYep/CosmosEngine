@@ -1,9 +1,6 @@
-﻿using Cosmos.Network;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
-
 namespace Cosmos
 {
     internal static class GameManager

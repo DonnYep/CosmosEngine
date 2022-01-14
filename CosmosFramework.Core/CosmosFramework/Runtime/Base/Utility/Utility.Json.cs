@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System;
+﻿using System;
 using System.Text;
-
 namespace Cosmos
 {
     public static partial class Utility

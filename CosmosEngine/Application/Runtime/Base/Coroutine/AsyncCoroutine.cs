@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 
 namespace Cosmos
 {
@@ -10,40 +7,40 @@ namespace Cosmos
     /// <summary>
     /// 异步单线程协程测案例
     /// </summary>
-/*
-static void AsyncCoroutineTest()
-{
-    Task.Run(AsyncCoroutine.Instance.Start);
-    Console.WriteLine(DateTime.Now.Ticks / 10000);
-    Console.WriteLine(Utility.Time.MillisecondNow());
-    AsyncCoroutine.Instance.WaitTimeAsyncCallback(1001, () =>
+    /*
+    static void AsyncCoroutineTest()
     {
-        Console.WriteLine("Callback01");
-        Task.Run(() => { AsyncCoroutine.Instance.WaitTimeAsyncCallback(2300, () => Console.WriteLine("Callback0233")); });
-    });
-    AsyncCoroutine.Instance.WaitTimeAsyncCallback(1500, () => Console.WriteLine("Callback02"));
-    AsyncCoroutine.Instance.WaitTimeAsyncCallback(2000, () => Console.WriteLine("Callback03"));
-    AsyncCoroutine.Instance.WaitTimeAsyncCallback(3000, () =>
-    {
-        Console.WriteLine("Callback04");
-        AsyncCoroutine.Instance.WaitTimeAsyncCallback(6000, () => Console.WriteLine("Callback05"));
-    });
-    Console.WriteLine(AsyncCoroutine.Instance.CorouCount);
-    AsyncCoroutine.Instance.WaitTimeAsyncCallback(15001, () =>
-    {
-        Console.WriteLine("Callback06");
+        Task.Run(AsyncCoroutine.Instance.Start);
+        Console.WriteLine(DateTime.Now.Ticks / 10000);
+        Console.WriteLine(Utility.Time.MillisecondNow());
+        AsyncCoroutine.Instance.WaitTimeAsyncCallback(1001, () =>
+        {
+            Console.WriteLine("Callback01");
+            Task.Run(() => { AsyncCoroutine.Instance.WaitTimeAsyncCallback(2300, () => Console.WriteLine("Callback0233")); });
+        });
+        AsyncCoroutine.Instance.WaitTimeAsyncCallback(1500, () => Console.WriteLine("Callback02"));
+        AsyncCoroutine.Instance.WaitTimeAsyncCallback(2000, () => Console.WriteLine("Callback03"));
+        AsyncCoroutine.Instance.WaitTimeAsyncCallback(3000, () =>
+        {
+            Console.WriteLine("Callback04");
+            AsyncCoroutine.Instance.WaitTimeAsyncCallback(6000, () => Console.WriteLine("Callback05"));
+        });
         Console.WriteLine(AsyncCoroutine.Instance.CorouCount);
-    });
-}
-*/
+        AsyncCoroutine.Instance.WaitTimeAsyncCallback(15001, () =>
+        {
+            Console.WriteLine("Callback06");
+            Console.WriteLine(AsyncCoroutine.Instance.CorouCount);
+        });
+    }
+    */
 
-/// <summary>
-/// 单线程异步协程，需要由外部主线程开启；
-/// 单线程异步减少多线程的开启消耗；
-/// 开启协程请调用 Start；
-/// 生命周期：Task.Run(Start)->OnPause/OnUnPause->Abort->OnRenewal->Task.Run(Start);
-/// </summary>
-public class AsyncCoroutine : ConcurrentSingleton<AsyncCoroutine>, IControllable, IRenewable
+    /// <summary>
+    /// 单线程异步协程，需要由外部主线程开启；
+    /// 单线程异步减少多线程的开启消耗；
+    /// 开启协程请调用 Start；
+    /// 生命周期：Task.Run(Start)->OnPause/OnUnPause->Abort->OnRenewal->Task.Run(Start);
+    /// </summary>
+    public class AsyncCoroutine : ConcurrentSingleton<AsyncCoroutine>, IControllable, IRenewable
 {
     /// <summary>
     /// 内部的协程结构体
