@@ -6,35 +6,51 @@ namespace Cosmos
     public class SkipList<T> : ICollection<T>
         where T : IComparable
     {
-        internal SkipListNode<T> topLeft;
-        internal SkipListNode<T> bottomLeft;
-        internal Random random;
-        private int currentLevel;
+        SkipListNode<T> topLeft;
+        SkipListNode<T> bottomLeft;
+        Random random;
+        /// <summary>
+        /// 当前跳表层数；
+        /// </summary>
+        int level;
         /// <summary>
         /// 节点数量；
         /// Node count 
         /// </summary>
-        private int nodeCount;
-        private int maxLevels = int.MaxValue;
+        int nodeCount;
+        int maxLevels = int.MaxValue;
+        /// <summary>
+        /// 跳表节点缓存；
+        /// </summary>
+        Queue<SkipListNode<T>> cachedNodes;
+        /// <summary>
+        /// 当前跳表层数；
+        /// </summary>
+        public int Level { get { return level; } }
+        public int MaxLevels { get { return maxLevels; } set { maxLevels = value; } }
+        /// <summary>
+        /// 节点数量；
+        /// 返回最底层节点数量；
+        /// </summary>
+        public int Count { get { return nodeCount; } }
+        public bool IsReadOnly { get { return false; } }
+        /// <summary>
+        /// 节点头，即最底层第一个节点；
+        /// </summary>
+        public SkipListNode<T> Head { get { return bottomLeft; } }
+        /// <summary>
+        /// 节点缓存数量；
+        /// </summary>
+        public int CachedNodeCount { get { return cachedNodes.Count; } }
         public SkipList()
         {
             topLeft = new SkipListNode<T>(default(T));
             bottomLeft = topLeft;
-            currentLevel = 1;
+            level = 1;
             nodeCount = 0;
-            random = new Random(); //used for adding new values
+            random = new Random();
+            cachedNodes = new Queue<SkipListNode<T>>();
         }
-        /// <summary>
-        /// 当前跳表层数；
-        /// </summary>
-        public int Level { get { return currentLevel; } }
-        public int MaxLevels { get { return maxLevels; } set { maxLevels = value; } }
-        /// <summary>
-        /// 节点数量；
-        /// </summary>
-        public int Count { get { return nodeCount; } }
-        public bool IsReadOnly { get { return false; } }
-        public SkipListNode<T> Head { get { return bottomLeft; } }
         public void Add(T value)
         {
             //添加流程：
@@ -43,25 +59,25 @@ namespace Cosmos
             //3. 分配查询层级节点
 
             int valueLevel = CoinFlipLevel();
-            int valueLevelCount = valueLevel - currentLevel;
+            int valueLevelCount = valueLevel - level;
             while (valueLevelCount > 0)
             {
                 //补全TopLeft节点
-                var newNode = new SkipListNode<T>(topLeft.Value);
+                var newNode = AcquireNode(topLeft.Value);
                 newNode.Below = topLeft;
                 topLeft.Above = newNode;
                 topLeft = newNode;
 
                 valueLevelCount--;
-                currentLevel++;
+                level++;
             }
             SkipListNode<T> currentNode = topLeft;
             SkipListNode<T> lastNodeAbove = null;
-            var remainLevel = currentLevel - 1;//剩余的层数
+            var remainLevel = level - 1;//剩余的层数
 
             while (currentNode != null && remainLevel >= 0)
             {
-                if (remainLevel > currentLevel)
+                if (remainLevel > level)
                 {
                     //进入到当前节点的高度
                     currentNode = currentNode.Below;
@@ -79,7 +95,7 @@ namespace Cosmos
                         break;// nextNode节点的值大于等于当前插入的值
                     }
                 }
-                var newNode = new SkipListNode<T>(value);
+                var newNode = AcquireNode(value);
                 newNode.Next = currentNode.Next;
                 newNode.Previous = currentNode;
                 newNode.Next.Previous = newNode;
@@ -104,6 +120,7 @@ namespace Cosmos
                 this.Remove(currentNode);
                 currentNode = nextNode;
             }
+            cachedNodes.Clear();
         }
         public bool Contains(T value)
         {
@@ -181,8 +198,7 @@ namespace Cosmos
                     nextNode.Previous = previousNode;
 
                     var belowNode = currentNodeDown.Below;
-                    currentNodeDown.Dispose();
-
+                    ReleaseNode(currentNodeDown);
                     currentNodeDown = belowNode;
                 }
                 nodeCount--;
@@ -261,6 +277,13 @@ namespace Cosmos
                 return valueNode;
             }
         }
+        /// <summary>
+        /// 清除跳表节点缓存；
+        /// </summary>
+        public void ClearCachedNodes()
+        {
+            cachedNodes.Clear();
+        }
         public IEnumerator<T> GetEnumerator()
         {
             return new SkipListEnumerator(this);
@@ -278,7 +301,7 @@ namespace Cosmos
         int CoinFlipLevel()
         {
             int level = 0;
-            while (random.Next(0, 1) == 1 && level < currentLevel)//投掷硬币为1时增加一层
+            while (random.Next(0, 1) == 1 && level < this.level)//投掷硬币为1时增加一层
             {
                 level++;
             }
@@ -286,7 +309,7 @@ namespace Cosmos
         }
         void ClearEmptyLevels()
         {
-            if (currentLevel > 1)
+            if (level > 1)
             {
                 var currentNode = topLeft;
                 while (currentNode != bottomLeft)
@@ -298,7 +321,7 @@ namespace Cosmos
 
                         currentNode.Next.Dispose();
                         currentNode.Dispose();
-                        currentLevel--;
+                        level--;
                         currentNode = belowNode;
                     }
                     else
@@ -307,6 +330,26 @@ namespace Cosmos
                     }
                 }
             }
+        }
+
+        SkipListNode<T> AcquireNode(T value)
+        {
+            SkipListNode<T> node = null;
+            if (cachedNodes.Count > 0)
+            {
+                node = cachedNodes.Dequeue();
+                node.Value = value;
+            }
+            else
+            {
+                node = new SkipListNode<T>(value);
+            }
+            return node;
+        }
+        void ReleaseNode(SkipListNode<T> node)
+        {
+            node.Dispose();
+            cachedNodes.Enqueue(node);
         }
         /// <summary>
         /// 跳表迭代对象，遍历最低一层的跳表；
