@@ -79,7 +79,7 @@ namespace Cosmos
         {
             server.Stop();
         }
-        public void AbortChannne()
+        public void AbortChannnel()
         {
             StopServer();
             NetworkChannelKey = NetworkChannelKey.None;
