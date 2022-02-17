@@ -1,7 +1,7 @@
 ﻿namespace Cosmos.FSM
 {
-    public abstract class FSMTrigger<T>
-        where T : class
+    public abstract  class FSMTrigger<T>
+        where T:class
     {
         protected string triggerName;
         public string TriggerName { get { return triggerName; } }

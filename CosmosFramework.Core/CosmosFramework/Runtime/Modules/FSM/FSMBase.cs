@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 namespace Cosmos.FSM
 {
     public abstract class FSMBase : IRefreshable
@@ -9,6 +10,7 @@ namespace Cosmos.FSM
             get { return name; }
             protected set { name = value ?? string.Empty; }
         }
+        public string GroupName { get; internal set; }
         public abstract Type OwnerType { get; }
         public abstract int FSMStateCount { get; }
         public abstract bool IsRunning { get; }

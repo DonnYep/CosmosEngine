@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 namespace Cosmos.FSM
 {
-    public abstract class FSMState<T> where T : class
+    public abstract class FSMState<T> where T:class
     {
         #region Properties
         List<FSMTrigger<T>> triggerList = new List<FSMTrigger<T>>();
-        Dictionary<FSMTrigger<T>, FSMState<T>> triggerStateDict
+        Dictionary<FSMTrigger<T>, FSMState<T>> triggerStateDict 
             = new Dictionary<FSMTrigger<T>, FSMState<T>>();
-        public void AddTrigger(FSMTrigger<T> trigger, FSMState<T> state)
+        public void AddTrigger(FSMTrigger<T> trigger,FSMState<T> state)
         {
             if (triggerStateDict.ContainsKey(trigger))
                 return;

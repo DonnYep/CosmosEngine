@@ -7,7 +7,7 @@ namespace Cosmos.FSM
     /// </summary>
     /// <typeparam name="T">持有者类型</typeparam>
     public interface IFSM<T>
-        where T : class
+        where T:class
     {
         /// <summary>
         /// 状态机持有者
