@@ -24,6 +24,8 @@ namespace Cosmos
         /// Y轴跳表；
         /// </summary>
         readonly AOISkipList<AOIEntity, float> yLinks;
+        public AOISkipList<AOIEntity, float> YLinks { get { return yLinks; } }
+        public AOISkipList<AOIEntity, float> XLinks { get { return xLinks; } }
         /// <summary>
         /// 当前AOI的矩形区域；
         /// </summary>
@@ -63,26 +65,17 @@ namespace Cosmos
                 if (!IsOverlapping(posX, posY))
                     return false;
                 var entity = AcquireEntity(key, obj);
-
-                xLinks.Add(entity);
-                yLinks.Add(entity);
-
-                var xNode = xLinks.FindLowest(entity);
-                var yNode = yLinks.FindLowest(entity);
-
-                entity.XNode = xNode;
-                entity.YNode = yNode;
-
-                entityDict.Add(key, entity);
-
                 entity.PositionX = posX;
                 entity.PositionY = posY;
-
+                xLinks.Add(entity);
+                yLinks.Add(entity);
+                var xNode = xLinks.FindLowest(entity);
+                var yNode = yLinks.FindLowest(entity);
+                entity.XNode = xNode;
+                entity.YNode = yNode;
+                entityDict.Add(key, entity);
                 entity.ViewDistance = viewDistance;
-
-                CheckEntitysNeighbor(xNode, entity);
-                CheckEntitysNeighbor(yNode, entity);
-
+                CheckEntitysNeighbor(entity);
                 return true;
             }
             return false;
@@ -100,25 +93,19 @@ namespace Cosmos
             if (!IsOverlapping(posX, posY))
                 return;
             var entity = AcquireEntity(key, obj);
-
-            xLinks.Add(entity);
-            yLinks.Add(entity);
-
-            var xNode = xLinks.FindLowest(entity);
-            var yNode = yLinks.FindLowest(entity);
-
-            entity.XNode = xNode;
-            entity.YNode = yNode;
-
-            entityDict.Add(key, entity);
-
+            xLinks.Remove(entity);
+            yLinks.Remove(entity);
             entity.PositionX = posX;
             entity.PositionY = posY;
-
+            xLinks.Add(entity);
+            yLinks.Add(entity);
+            var xNode = xLinks.FindLowest(entity);
+            var yNode = yLinks.FindLowest(entity);
+            entity.XNode = xNode;
+            entity.YNode = yNode;
+            entityDict[key] = entity;
             entity.ViewDistance = viewDistance;
-
-            CheckEntitysNeighbor(xNode, entity);
-            CheckEntitysNeighbor(yNode, entity);
+            CheckEntitysNeighbor(entity);
         }
         public bool Remove(long key, out T value)
         {
@@ -128,15 +115,10 @@ namespace Cosmos
                 value = entity.Handle;
                 var xNode = xLinks.FindLowest(entity);
                 var yNode = yLinks.FindLowest(entity);
-
                 entity.XNode = xNode;
                 entity.YNode = yNode;
-
                 entity.SwapViewEntity();
-
-                CheckEntitysNeighbor(xNode, entity);
-                CheckEntitysNeighbor(yNode, entity);
-
+                CheckEntitysNeighbor(entity);
                 xLinks.Remove(entity);
                 yLinks.Remove(entity);
                 ReleaseEntity(entity);
@@ -154,7 +136,8 @@ namespace Cosmos
         {
             value = default(T);
             var rst = entityDict.TryGetValue(key, out var entity);
-            value = entity.Handle;
+            if (rst)
+                value = entity.Handle;
             return rst;
         }
         /// <summary>
@@ -177,6 +160,43 @@ namespace Cosmos
             return entityDict.ContainsKey(key);
         }
         /// <summary>
+        /// 刷新位置；
+        /// </summary>
+        /// <param name="key">实体的key</param>
+        /// <param name="posX">X方向新的位置点</param>
+        /// <param name="poxY">Y方向新的位置点</param>
+        public void Refresh(long key, float posX, float poxY)
+        {
+            if (entityDict.TryGetValue(key, out var entity))
+            {
+                if (!IsOverlapping(posX, poxY))
+                    return;
+                xLinks.Remove(entity);
+                entity.PositionX = posX;
+                xLinks.Add(entity);
+                yLinks.Remove(entity);
+                entity.PositionY = poxY;
+                yLinks.Add(entity);
+                entity.SwapViewEntity();
+                CheckEntitysNeighbor(entity);
+            }
+        }
+        /// <summary>
+        /// 对AOIZone内的实体对象进行强制更新；
+        /// </summary>
+        public void Refresh()
+        {
+            foreach (var entity in entityDict.Values)
+            {
+                xLinks.Remove(entity);
+                xLinks.Add(entity);
+                yLinks.Remove(entity);
+                yLinks.Add(entity);
+                entity.SwapViewEntity();
+                CheckEntitysNeighbor(entity);
+            }
+        }
+        /// <summary>
         /// 移动；
         /// </summary>
         /// <param name="key">实体的key</param>
@@ -191,28 +211,29 @@ namespace Cosmos
                     return;
                 if (Math.Abs(entity.PositionX - posX) > 0)
                 {
+                    xLinks.Remove(entity);
                     entity.PositionX = posX;
-                    xLinks.Update(entity);
+                    xLinks.Add(entity);
                     isMoved = true;
                 }
                 if (Math.Abs(entity.PositionY - poxY) > 0)
                 {
+                    yLinks.Remove(entity);
                     entity.PositionY = poxY;
-                    yLinks.Update(entity);
+                    yLinks.Add(entity);
                     isMoved = true;
                 }
-
                 if (!isMoved)
                     return;
-
                 entity.SwapViewEntity();
-
-                var xNode = xLinks.FindLowest(entity);
-                var yNode = yLinks.FindLowest(entity);
-
-                CheckEntitysNeighbor(xNode, entity);
-                CheckEntitysNeighbor(yNode, entity);
+                CheckEntitysNeighbor(entity);
             }
+        }
+        public void Clear()
+        {
+            xLinks.Clear();
+            yLinks.Clear();
+            entityDict.Clear();
         }
         /// <summary>
         /// 获取临近的对象；
@@ -226,10 +247,7 @@ namespace Cosmos
                 return;
             if (entityDict.TryGetValue(key, out var entity))
             {
-                var xNode = xLinks.FindLowest(entity);
-                var yNode = yLinks.FindLowest(entity);
-                GetNeighborNodeValue(xNode, viewDistance, ref values);
-                GetNeighborNodeValue(yNode, viewDistance, ref values);
+                GetNeighborNodeValue(entity, viewDistance, ref values);
                 values.Remove(entity.Handle);
             }
         }
@@ -245,11 +263,7 @@ namespace Cosmos
                 return;
             if (entityDict.TryGetValue(key, out var entity))
             {
-                var xNode = xLinks.FindLowest(entity);
-                var yNode = yLinks.FindLowest(entity);
-
-                GetNeighborNodeEntities(xNode, viewDistance, ref entities);
-                GetNeighborNodeEntities(yNode, viewDistance, ref entities);
+                GetNeighborNodeEntities(entity, viewDistance, ref entities);
                 entities.Remove(entity);
             }
         }
@@ -259,11 +273,7 @@ namespace Cosmos
                 return;
             if (entityDict.TryGetValue(key, out var entity))
             {
-                var xNode = xLinks.FindLowest(entity);
-                var yNode = yLinks.FindLowest(entity);
-
-                GetNeighborNodeEntities(xNode, entity.ViewDistance, ref entities);
-                GetNeighborNodeEntities(yNode, entity.ViewDistance, ref entities);
+                GetNeighborNodeEntities(entity, entity.ViewDistance, ref entities);
                 entities.Remove(entity);
             }
         }
@@ -273,13 +283,24 @@ namespace Cosmos
                 return;
             if (entityDict.TryGetValue(key, out var entity))
             {
-                var xNode = xLinks.FindLowest(entity);
-                var yNode = yLinks.FindLowest(entity);
-
-                GetNeighborNodeValue(xNode, entity.ViewDistance, ref values);
-                GetNeighborNodeValue(yNode, entity.ViewDistance, ref values);
+                GetNeighborNodeValue(entity, entity.ViewDistance, ref values);
                 values.Remove(entity.Handle);
             }
+        }
+        /// <summary>
+        ///通过临近坐标获取附近的实体； 
+        /// </summary>
+        public void GetNeighbors(float posX, float posY, float viewDistance, ref HashSet<AOIEntity> entities)
+        {
+            TryAdd(long.MinValue, default(T), posX, posY, viewDistance);
+            GetNeighbors(long.MinValue, viewDistance, ref entities);
+            Remove(long.MinValue, out _);
+        }
+        public void GetNeighbors(float posX, float poxY, float viewDistance, ref HashSet<T> values)
+        {
+            TryAdd(long.MinValue, default(T), posX, poxY, viewDistance);
+            GetNeighbors(long.MinValue, viewDistance, ref values);
+            Remove(long.MinValue, out _);
         }
         /// <summary>
         ///右值实体是否在左值实体的视野范围之内；
@@ -298,8 +319,10 @@ namespace Cosmos
             var lhsYNode = yLinks.FindLowest(lhsEntity);
             var rhsXNode = xLinks.FindLowest(rhsEntity);
             var rhsYNode = yLinks.FindLowest(rhsEntity);
-            if (AbsDistance(lhsXNode, rhsXNode) > lhsViewDistance) return false;
-            if (AbsDistance(lhsYNode, rhsYNode) > lhsViewDistance) return false;
+            var xDistance = Math.Abs(lhsXNode.Value.PositionX - rhsXNode.Value.PositionX);
+            if (xDistance > lhsViewDistance) return false;
+            var yDistance = Math.Abs(lhsYNode.Value.PositionY - rhsYNode.Value.PositionY);
+            if (yDistance > lhsViewDistance) return false;
             return true;
         }
         /// <summary>
@@ -318,15 +341,11 @@ namespace Cosmos
             var lhsYNode = yLinks.FindLowest(lhsEntity);
             var rhsXNode = xLinks.FindLowest(rhsEntity);
             var rhsYNode = yLinks.FindLowest(rhsEntity);
-            if (AbsDistance(lhsXNode, rhsXNode) > lhsEntity.ViewDistance) return false;
-            if (AbsDistance(lhsYNode, rhsYNode) > lhsEntity.ViewDistance) return false;
+            var xDistance = Math.Abs(lhsXNode.Value.PositionX - rhsXNode.Value.PositionX);
+            if (xDistance > lhsEntity.ViewDistance) return false;
+            var yDistance = Math.Abs(lhsYNode.Value.PositionY - rhsYNode.Value.PositionY);
+            if (yDistance > lhsEntity.ViewDistance) return false;
             return true;
-        }
-        double AbsDistance(AOISkipList<AOIEntity, float>.AOISkipListNode a, AOISkipList<AOIEntity, float>.AOISkipListNode b)
-        {
-            var xDiff = Math.Abs(a.Value.PositionX - b.Value.PositionX);
-            var yDiff = Math.Abs(a.Value.PositionY - b.Value.PositionY);
-            return Math.Pow(xDiff * xDiff + yDiff * yDiff, 0.5);
         }
         AOIEntity AcquireEntity(long key, T value)
         {
@@ -348,8 +367,11 @@ namespace Cosmos
             entity.Dispose();
             entityCacheQueue.Enqueue(entity);
         }
-        void CheckEntitysNeighbor(AOISkipList<AOIEntity, float>.AOISkipListNode dstNode, AOIEntity dstEntity)
+        void CheckEntitysNeighbor(AOIEntity entity)
         {
+            var dstNode = xLinks.FindLowest(entity);
+            if (dstNode == null)
+                return;
             for (int i = 0; i < 2; i++)
             {
                 var curNode = i == 0 ? dstNode.Next : dstNode.Previous;
@@ -357,23 +379,30 @@ namespace Cosmos
                 {
                     if (!curNode.IsFooter() && !curNode.IsHeader())
                     {
-                        var distance = AbsDistance(dstNode, curNode);
-                        if (distance > (float)dstEntity.ViewDistance)
+                        var xDistance = Math.Abs(dstNode.Value.PositionX - curNode.Value.PositionX);
+                        if (xDistance > (double)entity.ViewDistance)
                         {
                             break;
                         }
                         else
                         {
-                            if (curNode.Value.EntityKey != dstNode.Value.EntityKey)
-                                dstEntity.ViewEntities.Add(curNode.Value);
+                            var yDistance = Math.Abs(dstNode.Value.PositionY - curNode.Value.PositionY);
+                            if (yDistance <= entity.ViewDistance)
+                            {
+                                if (curNode.Value.EntityKey != dstNode.Value.EntityKey)
+                                    entity.ViewEntities.Add(curNode.Value);
+                            }
                         }
                     }
                     curNode = i == 0 ? curNode.Next : curNode.Previous;
                 }
             }
         }
-        void GetNeighborNodeEntities(AOISkipList<AOIEntity, float>.AOISkipListNode dstNode, float viewDistance, ref HashSet<AOIEntity> entities)
+        void GetNeighborNodeEntities(AOIEntity entity, float viewDistance, ref HashSet<AOIEntity> entities)
         {
+            var dstNode = xLinks.FindLowest(entity);
+            if (dstNode == null)
+                return;
             for (int i = 0; i < 2; i++)
             {
                 var curNode = i == 0 ? dstNode.Next : dstNode.Previous;
@@ -381,22 +410,29 @@ namespace Cosmos
                 {
                     if (!curNode.IsFooter() && !curNode.IsHeader())
                     {
-                        var distance = AbsDistance(dstNode, curNode);
-                        if (distance > (float)viewDistance)
+                        var xDistance = Math.Abs(dstNode.Value.PositionX - curNode.Value.PositionX);
+                        if (xDistance > viewDistance)
                         {
                             break;
                         }
                         else
                         {
-                            entities.Add(curNode.Value);
+                            var yDistance = Math.Abs(dstNode.Value.PositionY - curNode.Value.PositionY);
+                            if (yDistance < viewDistance)
+                            {
+                                entities.Add(curNode.Value);
+                            }
                         }
                     }
                     curNode = i == 0 ? curNode.Next : curNode.Previous;
                 }
             }
         }
-        void GetNeighborNodeValue(AOISkipList<AOIEntity, float>.AOISkipListNode dstNode, float viewDistance, ref HashSet<T> values)
+        void GetNeighborNodeValue(AOIEntity entity, float viewDistance, ref HashSet<T> values)
         {
+            var dstNode = xLinks.FindLowest(entity);
+            if (dstNode == null)
+                return;
             for (int i = 0; i < 2; i++)
             {
                 var curNode = i == 0 ? dstNode.Next : dstNode.Previous;
@@ -404,14 +440,18 @@ namespace Cosmos
                 {
                     if (!curNode.IsFooter() && !curNode.IsHeader())
                     {
-                        var distance = AbsDistance(dstNode, curNode);
-                        if (distance > (float)viewDistance)
+                        var xDistance = Math.Abs(dstNode.Value.PositionX - curNode.Value.PositionX);
+                        if (xDistance > viewDistance)
                         {
                             break;
                         }
                         else
                         {
-                            values.Add(curNode.Value.Handle);
+                            var yDistance = Math.Abs(dstNode.Value.PositionY - curNode.Value.PositionY);
+                            if (yDistance < viewDistance)
+                            {
+                                values.Add(curNode.Value.Handle);
+                            }
                         }
                     }
                     curNode = i == 0 ? curNode.Next : curNode.Previous;
