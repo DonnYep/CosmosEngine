@@ -24,8 +24,6 @@ namespace Cosmos
         /// Y轴跳表；
         /// </summary>
         readonly AOISkipList<AOIEntity, float> yLinks;
-        public AOISkipList<AOIEntity, float> YLinks { get { return yLinks; } }
-        public AOISkipList<AOIEntity, float> XLinks { get { return xLinks; } }
         /// <summary>
         /// 当前AOI的矩形区域；
         /// </summary>

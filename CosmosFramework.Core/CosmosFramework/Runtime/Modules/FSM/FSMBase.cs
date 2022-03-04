@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 namespace Cosmos.FSM
 {
-    public abstract class FSMBase : IRefreshable
+    public abstract class FSMBase
     {
         string name;
         public string Name

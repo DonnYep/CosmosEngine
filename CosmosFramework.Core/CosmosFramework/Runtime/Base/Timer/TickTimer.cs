@@ -161,18 +161,13 @@ namespace Cosmos
         {
             lock (locker)
             {
-                while (true)
+                while (taskDict.ContainsKey(taskIndex))
                 {
                     ++taskIndex;
                     if (taskIndex == int.MaxValue)
-                    {
                         taskIndex = 0;
-                    }
-                    if (!taskDict.ContainsKey(taskIndex))
-                    {
-                        return taskIndex;
-                    }
                 }
+                return taskIndex;
             }
         }
         /// <summary>
