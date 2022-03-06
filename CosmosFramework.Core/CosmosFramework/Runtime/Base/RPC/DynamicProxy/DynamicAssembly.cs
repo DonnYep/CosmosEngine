@@ -37,11 +37,11 @@ namespace Cosmos.RPC
                 return moduleBuilder.DefineType(name, attr, parent, interfaces);
             }
         }
-        public void AddOrUpdate(string typeName,Type type)
+        public void AddOrUpdate(string typeName, Type type)
         {
-            stringTypeDict.AddOrUpdate(typeName, type);
+            stringTypeDict[typeName] = type;
         }
-        public bool PeekType(string typeName,out Type type)
+        public bool PeekType(string typeName, out Type type)
         {
             return stringTypeDict.TryGetValue(typeName, out type);
         }
