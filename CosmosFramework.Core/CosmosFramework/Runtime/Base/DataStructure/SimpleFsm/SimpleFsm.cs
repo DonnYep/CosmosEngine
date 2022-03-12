@@ -13,15 +13,14 @@ namespace Cosmos
             = new Dictionary<Type, SimpleFsmState<T>>();
         public string FsmName { get; set; }
         public Type CurrentStateType { get { return currentState.GetType(); } }
-        /// <summary>
-        /// 拥有者；
-        /// </summary>
         public T Handle { get; private set; }
         public int StateCount { get { return typeStateDict.Count; } }
-        public void SetHandle(T handle)
+        public SimpleFsm(T handle, string fsmName)
         {
+            FsmName = fsmName;
             Handle = handle;
         }
+        public SimpleFsm(T handle) : this(handle, string.Empty) { }
         public void SetDefaultState(Type stateType)
         {
             currentState = GetState(stateType);
