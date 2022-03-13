@@ -1,4 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://github.com/DonnYep/CosmosEngine/blob/main/LICENSE)
+[![Issues:Welcome](https://img.shields.io/badge/Issues-welcome-blue.svg)](https://github.com/DonnYep/CosmosEngine/issues)
 # CosmosEngine
 
  CosmosEngine是一款轻量级的.NET服务器。支持网络多通道、服务器间RPC大数据流传输通讯、分布式部署。此项目长期维护更新，LTS。
@@ -23,7 +24,7 @@
 
 - **Singleton**：单例基类。提供了线程安全、非线程安全。
 
-- **DataStructure**：常用数据结构。链表、双向链表、二叉树、四叉树、LRU、线程锁、双向字典等数据结构。
+- **DataStructure**：常用数据结构。链表、双向链表、双向字典、二叉树、四叉树、AStar、LRU、线程锁等数据结构。
 
 - **EventCore** ：轻量级事件模块，可自定义监听的数据类型；
 
@@ -33,10 +34,10 @@
 ## 内置架构 PureMVC
 
 - 基于原始PureMVC改进的更适于理解的架构。
-    框架提供了基于特性更加简洁的注册方式：
-    - 1、MVCCommandAttribute，对应Command，即C层；
-    - 2、MVCMediatorAttribute，对应Mediator，即V层；
-    - 3、MVCProxyAttribute，对应Proxy，即M层；
+    框架提供了基于特性更加简洁的注册方式:
+    - 1.MVCCommandAttribute，对应Command，即C层；
+    - 2.MVCMediatorAttribute，对应Mediator，即V层；
+    - 3.MVCProxyAttribute，对应Proxy，即M层；
     
 - MVC自动注册只需在入口调用MVC.RegisterAttributedMVC()方法即可。
 
@@ -57,8 +58,6 @@
     - OnTermination
 
 - 原生模块调用可通过CosmosEntry调用。
-
-- 部分带有Helper的模块可由使用者进行自定义实现，也可使用提供的Default对象；
 
 ## Library link
 
