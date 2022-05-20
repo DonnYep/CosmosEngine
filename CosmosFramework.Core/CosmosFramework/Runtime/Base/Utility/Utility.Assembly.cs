@@ -9,6 +9,22 @@ namespace Cosmos
     {
         public static class Assembly
         {
+
+            /// <summary>
+            /// 获取AppDomain中指定的程序集
+            /// </summary>
+            /// <param name="assemblyName">程序集名</param>
+            /// <returns>程序集</returns>
+            public static System.Reflection.Assembly GetAssembly(string assemblyName)
+            {
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                foreach (var assembly in assemblies)
+                {
+                    if (assembly.GetName().Name == assemblyName)
+                        return assembly;
+                }
+                return null;
+            }
             /// <summary>
             /// 反射工具，得到反射类的对象；
             /// 不可反射Mono子类，被反射对象必须是具有无参公共构造
@@ -394,6 +410,12 @@ where K : class
                     handler.Invoke(f.Name, f.GetValue(obj));
                 }
             }
+            /// <summary>
+            /// 遍历实例对象上的所有属性；
+            /// </summary>
+            /// <param name="type">实例对象类型</param>
+            /// <param name="obj">实例对象</param>
+            /// <param name="handler">遍历到一条字段执行的方法</param>
             public static void TraverseInstanceAllProperties(Type type, object obj, Action<string, object> handler)
             {
                 if (type == null)
@@ -746,6 +768,64 @@ where K : class
                         break;
                 }
                 return type;
+            }
+            /// <summary>
+            /// 获取类Type类型中的所有字段名；
+            /// </summary>
+            /// <typeparam name="T">type类型</typeparam>
+            /// <returns>名称数组</returns>
+            public static string[] GetTypeAllFields<T>()
+            {
+                return GetTypeAllFields(typeof(T));
+            }
+            /// <summary>
+            /// 获取类Type类型中的所有字段名；
+            /// </summary>
+            /// <param name="type">type类型</param>
+            /// <returns>名称数组</returns>
+            public static string[] GetTypeAllFields(Type type)
+            {
+                var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
+                return fields.Select(f => f.Name).ToArray();
+            }
+            /// <summary>
+            /// 获取Type类型中所有属性字段名；
+            /// </summary>
+            /// <typeparam name="T">type类型</typeparam>
+            /// <returns>名称数组</returns>
+            public static string[] GetTypeAllProperties<T>()
+            {
+                return GetTypeAllProperties(typeof(T));
+            }
+            /// <summary>
+            /// 获取Type类型中所有属性字段名；
+            /// </summary>
+            /// <param name="type">type类型</param>
+            /// <returns>名称数组</returns>
+            public static string[] GetTypeAllProperties(Type type)
+            {
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
+                return properties.Select(f => f.Name).ToArray();
+            }
+            /// <summary>
+            /// 获取Type类型中所有字段名称与字段类型的映射
+            /// </summary>
+            /// <param name="type">type类型</param>
+            /// <returns>名称与类型的映射</returns>
+            public static IDictionary<string, Type> GetTypeFieldsNameAndTypeMapping(Type type)
+            {
+                var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
+                return fields.ToDictionary(f => f.Name, t => t.FieldType);
+            }
+            /// <summary>
+            /// 获取Type类型中所有属性名称与字段类型的映射
+            /// </summary>
+            /// <param name="type">type类型</param>
+            /// <returns>名称与类型的映射</returns>
+            public static IDictionary<string, Type> GetTypePropertyNameAndTypeMapping(Type type)
+            {
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
+                return properties.ToDictionary(f => f.Name, t => t.PropertyType);
             }
         }
     }

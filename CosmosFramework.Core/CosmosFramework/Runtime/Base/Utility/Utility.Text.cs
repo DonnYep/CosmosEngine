@@ -8,6 +8,21 @@ namespace Cosmos
         {
             [ThreadStatic]//每个静态类型字段对于每一个线程都是唯一的
             static StringBuilder stringBuilderCache = new StringBuilder(1024);
+            static char[] stringConstant ={
+            '0','1','2','3','4','5','6','7','8','9',
+            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+            'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
+            };
+            public static string GenRandomString(int Length)
+            {
+                stringBuilderCache.Clear();
+                Random rd = new Random();
+                for (int i = 0; i < Length; i++)
+                {
+                    stringBuilderCache.Append(stringConstant[rd.Next(62)]);
+                }
+                return stringBuilderCache.ToString();
+            }
             public static string Append(params object[] args)
             {
                 if (args == null)
