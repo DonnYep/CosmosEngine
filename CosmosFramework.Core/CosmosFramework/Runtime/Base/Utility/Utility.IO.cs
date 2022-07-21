@@ -15,12 +15,21 @@ namespace Cosmos
             /// </summary>
             static UTF8Encoding utf8Encoding = new UTF8Encoding(false);
             /// <summary>
-            /// Get application absolute path;
+            /// 获取当前绝对路径
             /// </summary>
             /// <returns>path</returns>
             public static string ApplicationPath()
             {
                 return Path.GetFullPath(".");
+            }
+            /// <summary>
+            /// 获取文件夹中的所有文件；
+            /// </summary>
+            /// <param name="path">地址</param>
+            /// <returns>文件地址</returns>
+            public static string[] GetAllFiles(string path)
+            {
+                return Directory.GetFiles(path, ".", SearchOption.AllDirectories);
             }
             /// <summary>
             /// 获取文件夹中的文件数量；
@@ -432,6 +441,29 @@ namespace Cosmos
                 }
             }
             /// <summary>
+            /// 追加并完全写入所有bytes;
+            /// </summary>
+            /// <param name="path">写入的地址</param>
+            /// <param name="bytesArray">数组集合</param>
+            /// <returns>写入的长度</returns>
+            public static long AppendAndWriteAllBytes(string path, params byte[][] bytesArray)
+            {
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    var bytesArrayLength = bytesArray.Length;
+                    int size = 0;
+                    for (int i = 0; i < bytesArrayLength; i++)
+                    {
+                        stream.Write(bytesArray[i], 0, bytesArray[i].Length);
+                        size += bytesArray[i].Length;
+                    }
+                    var bytesLength = stream.Length;
+                    File.WriteAllBytes(path, stream.ToArray());
+                    stream.Close();
+                    return bytesLength;
+                }
+            }
+            /// <summary>
             /// 完全覆写；
             ///  使用UTF8编码；
             /// </summary>
@@ -574,6 +606,24 @@ namespace Cosmos
                     else subDirInfo = subDirInfo.Parent;
                 }
                 return isSubDir;
+            }
+            /// <summary>
+            /// 获取文件夹所包含的文件大小；
+            /// </summary>
+            /// <param name="path">路径</param>
+            /// <returns>文件夹大小</returns>
+            public static long GetDirectorySize(string path)
+            {
+                if (!Directory.Exists(path))
+                    return 0;
+                DirectoryInfo directory = new DirectoryInfo(path);
+                var allFiles = directory.GetFiles();
+                long totalSize = 0;
+                foreach (var file in allFiles)
+                {
+                    totalSize += file.Length;
+                }
+                return totalSize;
             }
         }
     }

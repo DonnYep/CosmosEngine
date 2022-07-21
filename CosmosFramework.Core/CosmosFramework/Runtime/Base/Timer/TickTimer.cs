@@ -48,6 +48,7 @@ namespace Cosmos
                 this.TaskCallback = null;
                 this.CancelCallback = null;
                 this.StartTime = 0;
+                this.LoopIndex = 0;
             }
         }
         public Action<string> LogInfo { get; set; }
@@ -55,7 +56,6 @@ namespace Cosmos
         public Action<string> LogError { get; set; }
         readonly DateTime startDateTime = new DateTime(1970, 1, 1, 0, 0, 0);
         readonly ConcurrentDictionary<int, TickTask> taskDict;
-        readonly object locker = new object();
         int taskIndex = 0;
         public int TaskCount { get { return taskDict.Count; } }
         Queue<TickTask> taskQueue;
@@ -84,8 +84,23 @@ namespace Cosmos
         /// <returns>添加事件成功后返回的ID</returns>
         public int AddTask(int intervalTime, Action<int> taskCallback, Action<int> cancelCallback, int loopCount = 1)
         {
+            return AddTask(intervalTime, 0, taskCallback, cancelCallback, loopCount);
+        }
+        /// <summary>
+        /// 添加任务；
+        /// 若任务添加成功，则返回大于0的TaskId；
+        /// 若任务添加失败，则返回-1；
+        /// </summary>
+        /// <param name="intervalTime">毫秒级别时间间隔</param>
+        /// <param name="delayTime">毫秒级别时间延迟</param>
+        /// <param name="taskCallback">执行回调</param>
+        /// <param name="cancelCallback">任务取消回调</param>
+        /// <param name="loopCount">执行次数</param>
+        /// <returns>添加事件成功后返回的ID</returns>
+        public int AddTask(int intervalTime, int delayTime, Action<int> taskCallback, Action<int> cancelCallback, int loopCount = 1)
+        {
             int tid = GenerateTaskId();
-            double startTime = GetUTCMilliseconds();
+            double startTime = GetUTCMilliseconds() + delayTime;
             double destTime = startTime + intervalTime;
             TickTask task = null;
             if (usePool)
@@ -159,16 +174,14 @@ namespace Cosmos
         }
         int GenerateTaskId()
         {
-            lock (locker)
+            ++taskIndex;
+            while (taskDict.ContainsKey(taskIndex))
             {
-                while (taskDict.ContainsKey(taskIndex))
-                {
-                    ++taskIndex;
-                    if (taskIndex == int.MaxValue)
-                        taskIndex = 0;
-                }
-                return taskIndex;
+                ++taskIndex;
+                if (taskIndex == int.MaxValue)
+                    taskIndex = 0;
             }
+            return taskIndex;
         }
         /// <summary>
         /// 获取毫秒级别时间；
