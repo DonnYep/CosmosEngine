@@ -2,7 +2,7 @@
 [![Issues:Welcome](https://img.shields.io/badge/Issues-welcome-blue.svg)](https://github.com/DonnYep/CosmosEngine/issues)
 # CosmosEngine
 
- CosmosEngine是一款轻量级的.NET服务器。支持网络多通道、服务器间RPC大数据流传输通讯、分布式部署。此项目长期维护更新，LTS。
+ CosmosEngine是一款轻量级的.NetCore服务器。支持网络多通道、服务器间RPC大数据流传输通讯、分布式部署。此项目长期维护更新，LTS。
 
 ## 环境
 
@@ -14,6 +14,8 @@
 ## Library link
 
 - CosmosFramework：https://github.com/DonnYep/CosmosFramework
+
+- QuarkAsset:https://github.com/DonnYep/QuarkAsset
 
 - KCP C:https://github.com/skywind3000/kcp
     
