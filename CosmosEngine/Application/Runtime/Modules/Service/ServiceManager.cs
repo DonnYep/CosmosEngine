@@ -1,5 +1,7 @@
 ﻿using System;
 using Cosmos;
+using Cosmos.Network;
+
 namespace CosmosEngine
 {
     /// <summary>
@@ -40,7 +42,7 @@ namespace CosmosEngine
             networkChannel.OnDataReceived+= OnReceiveDataHandle;
             networkChannel.StartServer();
             CosmosEntry.NetworkManager.AddChannel(networkChannel);
-            Utility.Debug.LogInfo(networkChannel.NetworkChannelKey + " Start Running");
+            Utility.Debug.LogInfo(networkChannel.ChannelName+ " Start Running");
         }
         void OnReceiveDataHandle(int conv, byte[] data)
         {

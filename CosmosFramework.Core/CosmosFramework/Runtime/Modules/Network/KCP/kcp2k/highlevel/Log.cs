@@ -3,9 +3,9 @@
 // (this way we don't have to depend on UnityEngine)
 using System;
 
-namespace kcp 
+namespace kcp2k
 {
-    public static class KCPLog
+    public static class Log
     {
         public static Action<string> Info = Console.WriteLine;
         public static Action<string> Warning = Console.WriteLine;

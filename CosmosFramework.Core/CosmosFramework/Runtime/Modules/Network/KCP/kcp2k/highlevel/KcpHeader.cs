@@ -1,4 +1,4 @@
-﻿namespace kcp 
+namespace kcp2k
 {
     // header for messages processed by kcp.
     // this is NOT for the raw receive messages(!) because handshake/disconnect
