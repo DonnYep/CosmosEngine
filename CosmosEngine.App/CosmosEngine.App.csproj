@@ -14,12 +14,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MessagePack" Version="2.3.75" />
+    <PackageReference Include="MessagePack" Version="2.4.35" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CosmosFramework.Core\CosmosFramework.Core.csproj" />
+    <ProjectReference Include="..\CosmosEngine.Core\CosmosEngine.Core.csproj" />
   </ItemGroup>
 
 </Project>
