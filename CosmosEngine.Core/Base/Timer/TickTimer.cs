@@ -133,7 +133,7 @@ namespace Cosmos
         }
         public bool PauseTask(int taskId)
         {
-            if (!taskDict.TryRemove(taskId, out TickTask task))
+            if (!taskDict.TryGetValue(taskId, out TickTask task))
                 return false;
             task.IsPause = true;
             var remainTime = task.DestTime - GetUTCMilliseconds();
@@ -142,7 +142,7 @@ namespace Cosmos
         }
         public bool UnPauseTask(int taskId)
         {
-            if (!taskDict.TryRemove(taskId, out TickTask task))
+            if (!taskDict.TryGetValue(taskId, out TickTask task))
                 return false;
             task.IsPause = false;
             task.DestTime = task.PauseRemainTime + GetUTCMilliseconds();
@@ -170,7 +170,7 @@ namespace Cosmos
                     //循环次数++，若循环idx比循环总数小，则进入下次循环；
                     if (task.LoopIndex < task.LoopCount)
                     {
-                        task.DestTime = task.StartTime + task.IntervalTime * (task.LoopIndex + 1);
+                        task.DestTime = nowTime + task.IntervalTime;
                         task.TaskCallback.Invoke(task.TaskId);
                     }
                     else
