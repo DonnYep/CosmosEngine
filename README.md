@@ -6,8 +6,14 @@
 
 ## 环境
 
-- .NetCore 3.1 及以上。
+- .NetCore 5 
 
+## 内置数据结构、工具
+
+- Utility工具集含，反射、算法、转换、IO、加密、Json、MessagePack、Time、Text等常用工具函数。
+  
+- 包含跳表、四叉树、AStar等数据结构。
+  
 ## RPC
 - RPC功能模块。客户端只需要接口即可生成动态代理对象，无需手动实现。服务器只需在被调用的方法上标记[RPCMemberAttribute]特性，就能实现被客户端RPC调用。RPC底层使用TCP协议，无需担心RPC方法返回的数据量，大数据会自动转换为流式传输，接收端只需要使用async/await方法等待数据结果，若数据解析错误，则抛出异常。
 
