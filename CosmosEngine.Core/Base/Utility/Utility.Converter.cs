@@ -14,7 +14,7 @@ namespace Cosmos
             /// </summary>
             /// <param name="context">需要解码的内容</param>
             /// <returns>解码后的内容</returns>
-            public static string DecodeToBase64(string context)
+            public static string DecodeFromBase64(string context)
             {
                 return Encoding.UTF8.GetString(Convert.FromBase64String(context));
             }
