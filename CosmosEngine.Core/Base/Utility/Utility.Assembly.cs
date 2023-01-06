@@ -9,10 +9,18 @@ namespace Cosmos
     {
         public static class Assembly
         {
-            static readonly System.Reflection.Assembly[] domainAssemblies;
+            static System.Reflection.Assembly[] domainAssemblies;
             static Assembly()
             {
                 domainAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+            }
+            /// <summary>
+            /// 设置域程序集
+            /// </summary>
+            /// <param name="assemblies">程序集</param>
+            public static void SetDomainAssemblies(System.Reflection.Assembly[] assemblies)
+            {
+                domainAssemblies = assemblies;
             }
 
             /// <summary>
