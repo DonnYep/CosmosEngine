@@ -1,5 +1,4 @@
-﻿using Cosmos.Config;
-using Cosmos.Event;
+﻿using Cosmos.Event;
 using Cosmos.FSM;
 using Cosmos.Network;
 using System;
@@ -38,7 +37,6 @@ namespace Cosmos
             }
         }
         public static IFSMManager FSMManager { get { return GetModule<IFSMManager>(); } }
-        public static IConfigManager ConfigManager { get { return GetModule<IConfigManager>(); } }
         public static INetworkManager NetworkManager { get { return GetModule<INetworkManager>(); } }
         public static IEventManager EventManager { get { return GetModule<IEventManager>(); } }
 
