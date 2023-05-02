@@ -40,7 +40,7 @@ namespace Cosmos
     /// 开启协程请调用 Start；
     /// 生命周期：Task.Run(Start)->OnPause/OnUnPause->Abort->OnRenewal->Task.Run(Start);
     /// </summary>
-    public class AsyncCoroutine : ConcurrentSingleton<AsyncCoroutine>, IControllable, IRenewable
+    public class AsyncCoroutine : ConcurrentSingleton<AsyncCoroutine>
 {
     /// <summary>
     /// 内部的协程结构体
