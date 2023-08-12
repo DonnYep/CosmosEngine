@@ -82,6 +82,8 @@ namespace Cosmos
             /// <returns>加密后的值</returns>
             public static byte[] Generate8BytesAESKey(string key)
             {
+                if (string.IsNullOrEmpty(key))
+                    return new byte[0];
                 var dstLen = 8;
                 var srcBytes = Encoding.UTF8.GetBytes(key);
                 byte[] dstBytes = new byte[dstLen];
@@ -106,6 +108,8 @@ namespace Cosmos
             /// <returns>加密后的值</returns>
             public static byte[] Generate16BytesAESKey(string key)
             {
+                if (string.IsNullOrEmpty(key))
+                    return new byte[0];
                 var dstLen = 16;
                 var srcBytes = Encoding.UTF8.GetBytes(key);
                 byte[] dstBytes = new byte[dstLen];
@@ -130,6 +134,8 @@ namespace Cosmos
             /// <returns>加密后的值</returns>
             public static byte[] Generate24BytesAESKey(string key)
             {
+                if (string.IsNullOrEmpty(key))
+                    return new byte[0];
                 var dstLen = 24;
                 var srcBytes = Encoding.UTF8.GetBytes(key);
                 byte[] dstBytes = new byte[dstLen];
@@ -154,6 +160,8 @@ namespace Cosmos
             /// <returns>加密后的值</returns>
             public static byte[] Generate32BytesAESKey(string key)
             {
+                if (string.IsNullOrEmpty(key))
+                    return new byte[0];
                 var dstLen = 32;
                 var srcBytes = Encoding.UTF8.GetBytes(key);
                 byte[] dstBytes = new byte[dstLen];
@@ -538,6 +546,71 @@ namespace Cosmos
                         stringBuilderCache.Append(ch[r.Next(ch.Length)]);
                     }
                     return stringBuilderCache.ToString();
+                }
+            }
+            /// <summary>
+            /// 异或加密
+            /// </summary>
+            /// <param name="context">需要加密的内容</param>
+            /// <param name="key">密钥</param>
+            /// <returns>加密后的内容</returns>
+            public static byte[] XorEncrypt(byte[] context, byte[] key)
+            {
+                byte[] outputBytes = new byte[context.Length];
+                var cntLength = outputBytes.Length;
+                var keyLength = key.Length;
+                for (int i = 0; i < cntLength; i++)
+                {
+                    outputBytes[i] = (byte)(context[i] ^ key[i % keyLength]);
+                }
+                return outputBytes;
+            }
+
+            //X | Y | Result
+            //==============
+            //0 | 0 | 0
+            //1 | 0 | 1
+            //0 | 1 | 1
+            //1 | 1 | 0
+
+            /// <summary>
+            /// 异或解密
+            /// </summary>
+            /// <param name="context">需要解密的内容</param>
+            /// <param name="key">密钥</param>
+            /// <returns>解密后的内容</returns>
+            public static byte[] XorDecrypt(byte[] context, byte[] key)
+            {
+                byte[] outputBytes = new byte[context.Length];
+                var cntLength = outputBytes.Length;
+                var keyLength = key.Length;
+                for (int i = 0; i < cntLength; i++)
+                {
+                    outputBytes[i] = (byte)(context[i] ^ key[i % keyLength]);
+                }
+                return outputBytes;
+            }
+
+            /// <summary>
+            /// Generate MD5
+            /// </summary>
+            /// <param name="context">bytes</param>
+            /// <returns>hash</returns>
+            public static string GenerateMD5(byte[] context)
+            {
+#if NET_STANDARD_2_0
+                using (var hash = MD5.Create())
+#elif NET_4_6
+                using (var hash = MD5Cng.Create())
+#endif
+                {
+                    byte[] data = hash.ComputeHash(context);
+                    var sBuilder = new StringBuilder();
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        sBuilder.Append(data[i].ToString("x2"));
+                    }
+                    return sBuilder.ToString();
                 }
             }
         }
