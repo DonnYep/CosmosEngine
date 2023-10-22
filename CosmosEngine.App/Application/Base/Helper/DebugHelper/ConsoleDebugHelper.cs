@@ -15,7 +15,7 @@ namespace CosmosEngine
         /// </summary>
         public ConsoleDebugHelper()
         {
-            this.logFullPath = Utility.IO.WebPathCombine(defaultLogPath, "Server.log");
+            this.logFullPath = Utility.IO.CombineURL(defaultLogPath, "Server.log");
             LogInfo("Log file path : " + logFullPath, null);
             AppendWriteTextFile(logFullPath, "Head");
             System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
