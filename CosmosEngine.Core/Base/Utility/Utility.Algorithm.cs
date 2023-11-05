@@ -391,6 +391,14 @@ namespace Cosmos
                 return random.Next(0, 2) * 2 - 1;
             }
             /// <summary>
+            /// 1或-1的随机值
+            /// </summary>
+            /// <returns> 1或-1</returns>
+            public static int OneOrMinusOne()
+            {
+                return random.Next(0, 2) * 2 - 1;
+            }
+            /// <summary>
             /// 数组去重；
             /// </summary>
             /// <typeparam name="T">可比数据类型</typeparam>
