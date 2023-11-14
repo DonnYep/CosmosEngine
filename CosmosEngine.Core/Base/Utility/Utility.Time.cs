@@ -68,16 +68,16 @@ namespace Cosmos
             /// 时间戳转UTC DateTime
             /// </summary>
             /// <returns>UTC DateTime</returns>
-            public static DateTime TimestampToDateTime(long ts)
+            public static DateTime TimestampToDateTime(long timeStamp)
             {
-                int length = (int)Math.Floor(Math.Log10(ts));
+                int length = (int)Math.Floor(Math.Log10(timeStamp));
                 DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
                 if (length == 9)
-                    return dateTime.AddSeconds(ts);
+                    return dateTime.AddSeconds(timeStamp);
                 if (length == 12)
-                    return dateTime.AddMilliseconds(ts);
+                    return dateTime.AddMilliseconds(timeStamp);
                 if (length == 16)
-                    return dateTime.AddTicks(ts);
+                    return dateTime.AddTicks(timeStamp);
                 return DateTime.MinValue;
             }
             /// <summary>
@@ -202,6 +202,100 @@ namespace Cosmos
                 sTemp += (lTicks % 3600 / 60).ToString().PadLeft(2, '0') + ":";
                 sTemp += (lTicks % 3600 % 60).ToString().PadLeft(2, '0');
                 return sTemp;
+            }
+            /// <summary>
+            /// 获取指定年份中指定月的天数
+            /// </summary>
+            public static int GetDaysOfMonth(int year, int month)
+            {
+                switch (month)
+                {
+                    case 1:
+                        return 31;
+                    case 2:
+                        return IsLeapYear(year) ? 29 : 28;
+                    case 3:
+                        return 31;
+                    case 4:
+                        return 30;
+                    case 5:
+                        return 31;
+                    case 6:
+                        return 30;
+                    case 7:
+                        return 31;
+                    case 8:
+                        return 31;
+                    case 9:
+                        return 30;
+                    case 10:
+                        return 31;
+                    case 11:
+                        return 30;
+                    case 12:
+                        return 31;
+                    default:
+                        return 0;
+                }
+            }
+            /// <summary>
+            /// 是否为闰年
+            /// </summary>
+            /// <param name="year">e.g.2023,2024</param>
+            /// <returns>结果</returns>
+            public static bool IsLeapYear(int year)
+            {
+                //形式参数为年份
+                //例如：2023
+                var n = year;
+                return n % 400 == 0 || n % 4 == 0 && n % 100 != 0;
+            }
+            /// <summary>
+            /// 获取第二天的午夜零时
+            /// </summary>
+            /// <returns>UTC午夜零时</returns>
+            public static DateTime GetTomorrowMidnightDateTime()
+            {
+                DateTime todayDate = DateTime.UtcNow.Date;
+                var nextDay = todayDate.AddDays(1);
+                return nextDay;
+            }
+            /// <summary>
+            /// 获取明日的午夜零时偏移量
+            /// <para>转换时间戳可使用方法：<see cref="DateTimeOffset.ToUnixTimeSeconds"/> </para> 
+            /// </summary>
+            /// <returns>日期偏移量</returns>
+            public static DateTimeOffset GetTomorrowMidnightDateTimeOffset()
+            {
+                var tomorrowDateTime = GetTomorrowMidnightDateTime();
+                return new DateTimeOffset(tomorrowDateTime);
+            }
+            /// <summary>
+            /// 获取指定时间的秒时间戳
+            /// </summary>
+            /// <param name="dateTime">指定日期</param>
+            /// <returns>秒时间戳</returns>
+            public static long GetDateSecondTimeStamp(DateTime dateTime)
+            {
+                return (dateTime.Ticks - epochTicks) / secDivisor;
+            }
+            /// <summary>
+            /// 获取指定时间的毫秒间戳
+            /// </summary>
+            /// <param name="dateTime">指定日期</param>
+            /// <returns>毫秒时间戳</returns>
+            public static long GetDateMillisecondTimeStamp(DateTime dateTime)
+            {
+                return (dateTime.Ticks - epochTicks) / msecDivisor;
+            }
+            /// <summary>
+            /// 获取指定时间的微秒时间戳
+            /// </summary>
+            /// <param name="dateTime">指定日期</param>
+            /// <returns>微秒时间戳</returns>
+            public static long GetDateMicrosecondTimeStamp(DateTime dateTime)
+            {
+                return (dateTime.Ticks - epochTicks);
             }
         }
     }
